@@ -4,13 +4,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.note_haie.model.ExempleTask
+import com.example.note_haie.ui.screens.home.HomeScreen
 import com.example.note_haie.ui.theme.NoteHaieTheme
 
 class MainActivity : ComponentActivity() {
@@ -19,29 +19,52 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             NoteHaieTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                AppNavigation()
             }
         }
     }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
+fun AppNavigation() {
+    val navController = rememberNavController()
+
+    // Définir le système de navigation
+    NavHost(navController = navController, startDestination = "home") {
+        composable("home") {
+            HomeScreen(ExempleTask.tasks)
+        }
+        composable("new-task") {
+            NewTaskScreen()
+        }
+        composable("parameter") {
+            ParameterScreen()
+        }
+        composable("update-task") {
+            UpdateTaskScreen()
+        }
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
+fun HomeScreenPreview() {
     NoteHaieTheme {
-        Greeting("Android")
+        HomeScreen(ExempleTask.tasks)
     }
+}
+
+@Composable
+fun NewTaskScreen() { //navController: NavHostController
+    TODO("Not yet implemented")
+}
+
+@Composable
+fun ParameterScreen() { //navController: NavHostController
+    TODO("Not yet implemented")
+}
+
+@Composable
+fun UpdateTaskScreen() { //navController: NavHostController
+    TODO("Not yet implemented")
 }
