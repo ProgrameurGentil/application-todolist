@@ -4,6 +4,7 @@ import androidx.compose.animation.core.Spring
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import kotlin.time.Clock
 
 enum class MonthName {
     JAN, FEV, MAR, AVR, MAI, JUI, JUIL, AOU, SEP, OCT, NOV, DEC
@@ -71,4 +72,9 @@ fun getDateWithUnixTime(unixTime: Long, zoneId: ZoneId = ZoneId.of("UTC")): Long
         .atStartOfDay(zoneId)
         .toInstant()
         .toEpochMilli()
+}
+
+fun getUnixTimeIsPassed(unixTime: Long): Boolean {
+    val actualUnixTime = System.currentTimeMillis()
+    return actualUnixTime > unixTime
 }

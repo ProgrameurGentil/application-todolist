@@ -57,7 +57,7 @@ import com.example.note_haie.utils.getDateWithUnixTime
 
 @Composable
 fun TaskView(task: Task) {
-    val dateTime = decomposeUnixTime(task.date)
+    val dateTime = if (task.date != null) {decomposeUnixTime(task.date)} else {decomposeUnixTime(0)}
     val stateTime = task.stateTime
     val name = task.name
     val date = if (dateTime.year > 0) {"le ${dateTime.day} ${dateTime.month} ${dateTime.year} à ${dateTime.hour}h${dateTime.minute}"} else "Aucune date définit"
@@ -310,10 +310,12 @@ fun FormTask(
         titleResponse = it.name
         descriptionResponse = it.description
         periodicityResponse = it.periodicy
-        val dateTime = decomposeUnixTime(it.date)
-        minuteResponse = dateTime.minute
-        hourResponse = dateTime.hour
-        dateResponse = getDateWithUnixTime(it.date)
+        it.date?.let {date ->
+            val dateTime = decomposeUnixTime(date)
+            minuteResponse = dateTime.minute
+            hourResponse = dateTime.hour
+            dateResponse = getDateWithUnixTime(date)
+        }
     }
 
     titleResponse?.let { setTitleResponse(it) }

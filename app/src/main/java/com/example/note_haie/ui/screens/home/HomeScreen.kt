@@ -22,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,18 +45,25 @@ import com.example.note_haie.ui.components.TaskButton
 import com.example.note_haie.ui.theme.LightWhite
 import com.example.note_haie.ui.theme.MainBackground
 import com.example.note_haie.ui.theme.NoteHaieTheme
+import com.example.note_haie.viewmodels.TaskViewModel
 
 @Composable
-fun HomeScreen(tasks: List<Task>, navController: NavHostController) {
+fun HomeScreen(viewModel: TaskViewModel, navController: NavHostController) {
+    val tasks by viewModel.fullTasks().collectAsState(initial = emptyList())
+
+    HomeScreenContent(tasks = tasks, { navController.navigate("new-task") })
+}
+
+@Composable
+fun HomeScreenContent(tasks: List<Task>, navigateToNewTask: () -> Unit) {
+
     var showPanelTask by remember { mutableStateOf(false) }
     var taskForPanelTask: Task? by remember { mutableStateOf(null) }
 
     Scaffold(
         floatingActionButton = {
             FloatingButton(
-                {
-                    navController.navigate("new-task")
-                }
+                onClick = navigateToNewTask
             )
         }
     ) { innerPadding ->
@@ -140,9 +148,9 @@ fun HomeScreen(tasks: List<Task>, navController: NavHostController) {
 @Composable
 fun HomeScreenPreview() {
     NoteHaieTheme {
-        HomeScreen(
+        HomeScreenContent(
             tasks = ExempleTask.tasks,
-            navController = rememberNavController()
+            {  }
         )
     }
 }
