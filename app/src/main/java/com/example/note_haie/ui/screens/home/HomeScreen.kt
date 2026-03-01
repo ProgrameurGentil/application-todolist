@@ -29,8 +29,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.note_haie.R
+import com.example.note_haie.model.ExempleTask
 import com.example.note_haie.model.Task
 import com.example.note_haie.ui.components.FloatingButton
 import com.example.note_haie.ui.components.FooterView
@@ -39,15 +43,20 @@ import com.example.note_haie.ui.components.PanelTask
 import com.example.note_haie.ui.components.TaskButton
 import com.example.note_haie.ui.theme.LightWhite
 import com.example.note_haie.ui.theme.MainBackground
+import com.example.note_haie.ui.theme.NoteHaieTheme
 
 @Composable
-fun HomeScreen(tasks: List<Task>) {
+fun HomeScreen(tasks: List<Task>, navController: NavHostController) {
     var showPanelTask by remember { mutableStateOf(false) }
     var taskForPanelTask: Task? by remember { mutableStateOf(null) }
 
     Scaffold(
         floatingActionButton = {
-            FloatingButton()
+            FloatingButton(
+                {
+                    navController.navigate("new-task")
+                }
+            )
         }
     ) { innerPadding ->
         Column(
@@ -124,5 +133,16 @@ fun HomeScreen(tasks: List<Task>) {
 
             FooterView()
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun HomeScreenPreview() {
+    NoteHaieTheme {
+        HomeScreen(
+            tasks = ExempleTask.tasks,
+            navController = rememberNavController()
+        )
     }
 }

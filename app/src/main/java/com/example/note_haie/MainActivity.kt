@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
@@ -11,6 +13,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.note_haie.model.ExempleTask
 import com.example.note_haie.ui.screens.home.HomeScreen
+import com.example.note_haie.ui.screens.newtask.NewTaskScreen
 import com.example.note_haie.ui.theme.NoteHaieTheme
 
 class MainActivity : ComponentActivity() {
@@ -30,12 +33,27 @@ fun AppNavigation() {
     val navController = rememberNavController()
 
     // Définir le système de navigation
-    NavHost(navController = navController, startDestination = "home") {
+    NavHost(
+        navController = navController,
+        startDestination = "home",
+        enterTransition = {
+            slideIntoContainer(
+                AnimatedContentTransitionScope.SlideDirection.Left,
+                animationSpec = tween(800)
+            )
+        },
+        exitTransition = {
+            slideOutOfContainer(
+                AnimatedContentTransitionScope.SlideDirection.Left,
+                animationSpec = tween(800)
+            )
+        }
+    ) {
         composable("home") {
-            HomeScreen(ExempleTask.tasks)
+            HomeScreen(ExempleTask.tasks, navController)
         }
         composable("new-task") {
-            NewTaskScreen()
+            NewTaskScreen(navController)
         }
         composable("parameter") {
             ParameterScreen()
@@ -50,13 +68,16 @@ fun AppNavigation() {
 @Composable
 fun HomeScreenPreview() {
     NoteHaieTheme {
-        HomeScreen(ExempleTask.tasks)
+        HomeScreen(ExempleTask.tasks, rememberNavController())
     }
 }
 
+@Preview(showBackground = true)
 @Composable
-fun NewTaskScreen() { //navController: NavHostController
-    TODO("Not yet implemented")
+fun NewTaskScreenPreview() {
+    NoteHaieTheme {
+        NewTaskScreen(rememberNavController())
+    }
 }
 
 @Composable

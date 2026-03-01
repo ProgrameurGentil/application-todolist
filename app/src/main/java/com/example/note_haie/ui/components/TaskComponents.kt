@@ -34,23 +34,33 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.note_haie.model.EnumPeriodicyTask
 import com.example.note_haie.model.EnumStateTimeTask
+import com.example.note_haie.model.ExempleTask
 import com.example.note_haie.model.Task
 import com.example.note_haie.model.label
 import com.example.note_haie.ui.theme.Black
+import com.example.note_haie.ui.theme.DarkBlue
 import com.example.note_haie.ui.theme.Green
 import com.example.note_haie.ui.theme.Grey
+import com.example.note_haie.ui.theme.LightGreen
 import com.example.note_haie.ui.theme.LightNightBlue
 import com.example.note_haie.ui.theme.LightRed
+import com.example.note_haie.ui.theme.MainBackground
+import com.example.note_haie.ui.theme.NoteHaieTheme
 import com.example.note_haie.ui.theme.Red
 import com.example.note_haie.ui.theme.White
+import com.example.note_haie.utils.decomposeUnixTime
+import com.example.note_haie.utils.getDateWithUnixTime
 
 @Composable
 fun TaskView(task: Task) {
+    val dateTime = decomposeUnixTime(task.date)
     val stateTime = task.stateTime
     val name = task.name
-    val date = task.date
+    val date = if (dateTime.year > 0) {"le ${dateTime.day} ${dateTime.month} ${dateTime.year} à ${dateTime.hour}h${dateTime.minute}"} else "Aucune date définit"
 
     val bgTimeStateIndicator = when (stateTime) {
         EnumStateTimeTask.LATE -> Red
@@ -113,7 +123,7 @@ fun TaskView(task: Task) {
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier
                         .fillMaxWidth(),
-                    color = White
+                    color = DarkBlue
                 )
             }
 
@@ -122,11 +132,11 @@ fun TaskView(task: Task) {
             )
 
             Text(
-                text = date,
+                text = date.toString(),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier
                     .fillMaxWidth(),
-                color = White
+                color = DarkBlue
             )
         }
     }
@@ -193,12 +203,13 @@ fun PanelTask(task: Task?, isVisible: Boolean, onDismiss: () -> Unit) {
                                 .fillMaxHeight(),
                             horizontalAlignment = Alignment.Start
                         ) {
+                            val dateTime = decomposeUnixTime(task?.date ?: 0)
                             Text(
                                 text = task?.name ?: "Nom par défaut",
                                 style = MaterialTheme.typography.headlineSmall
                             )
                             Text(
-                                text = task?.date ?: "Aucune date",
+                                text = if (dateTime.year > 0) {"le ${dateTime.day} ${dateTime.month} ${dateTime.year} à ${dateTime.hour}h${dateTime.minute}"} else "Aucune date définit",
                                 style = MaterialTheme.typography.titleMedium
                             )
                             Text(
@@ -234,7 +245,7 @@ fun PanelTask(task: Task?, isVisible: Boolean, onDismiss: () -> Unit) {
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
                         onClick = { },
-                        colors = ButtonColors(LightNightBlue, Black, LightNightBlue, LightNightBlue)
+                        colors = ButtonColors(LightGreen, Black, LightGreen, LightGreen)
                     ) {
                         Text(
                             text = "Modifier",
@@ -244,5 +255,165 @@ fun PanelTask(task: Task?, isVisible: Boolean, onDismiss: () -> Unit) {
                 }
             }
         }
+    }
+}
+
+@Composable
+fun FormTask(
+    modifier: Modifier,
+    title: String,
+    setTitleResponse: (String) -> Unit,
+    setDescriptionResponse: (String) -> Unit,
+    setPeriodicyResponse: (EnumPeriodicyTask) -> Unit,
+    setDateResponse: (Long) -> Unit,
+    setHourResponse: (Int) -> Unit,
+    setMinuteResponse: (Int) -> Unit,
+    buttonsContent: @Composable () -> Unit,
+    task: Task? = null
+) {
+
+    /**
+     * Avoir, je pense qu'on peux retirer les *Response et laisser le set*Response
+     * Il faut voir avec la modification des taches (Version 1)
+     */
+    var titleResponse by remember { mutableStateOf<String?>(null) }
+    var descriptionResponse by remember { mutableStateOf<String?>(null) }
+    var periodicityResponse by remember { mutableStateOf<EnumPeriodicyTask?>(null) }
+    var hourResponse by remember { mutableStateOf<Int?>(null) }
+    var minuteResponse by remember { mutableStateOf<Int?>(null) }
+    var dateResponse  by remember { mutableStateOf<Long?>(null) }
+
+    var dateIsRequired by remember { mutableStateOf(false) }
+    var timeIsRequired by remember { mutableStateOf(false) }
+    periodicityResponse?.let {
+        when(it) {
+            EnumPeriodicyTask.DAILY -> {
+                dateIsRequired = false
+                timeIsRequired = true
+            }
+            EnumPeriodicyTask.WEEKLY  -> {
+                dateIsRequired = true
+                timeIsRequired = true
+            }
+            EnumPeriodicyTask.MONTHLY -> {
+                dateIsRequired = true
+                timeIsRequired = true
+            }
+            else -> {
+                dateIsRequired = false
+                timeIsRequired = false
+            }
+        }
+    }
+
+    task?.let {
+        titleResponse = it.name
+        descriptionResponse = it.description
+        periodicityResponse = it.periodicy
+        val dateTime = decomposeUnixTime(it.date)
+        minuteResponse = dateTime.minute
+        hourResponse = dateTime.hour
+        dateResponse = getDateWithUnixTime(it.date)
+    }
+
+    titleResponse?.let { setTitleResponse(it) }
+    descriptionResponse?.let { setDescriptionResponse(it) }
+    periodicityResponse?.let { setPeriodicyResponse(it) }
+    hourResponse?.let { setHourResponse(it) }
+    minuteResponse?.let { setMinuteResponse(it) }
+    dateResponse?.let { setDateResponse(it) }
+
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.headlineMedium,
+            color = White
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        EntryView(
+            question = "Titre",
+            placeholder = "Votre titre ici ...",
+            isRequired = true,
+            textColor = White,
+            setResponse = {
+                titleResponse = it
+            }
+        )
+
+        BigEntryView(
+            question = "Description",
+            placeholder = "Votre description ici ...",
+            isRequired = false,
+            textColor = White,
+            setResponse = {
+                descriptionResponse = it
+            }
+        )
+
+        SelectBoxView(
+            question = "Periodicité",
+            isRequired = true,
+            textColor = White,
+            setSelectedOption = {
+                periodicityResponse = it
+            }
+        )
+
+        SelectTimeView(
+            setDateResponse = {
+                dateResponse = it
+            },
+            setHourResponse = {
+                hourResponse = it
+            },
+            setMinuteResponse = {
+                minuteResponse = it
+            },
+            dateIsRequired = dateIsRequired,
+            timeIsRequired = timeIsRequired
+        )
+
+        LabelRequired()
+
+        buttonsContent()
+    }
+}
+
+/* Previews */
+
+@Preview(showBackground = false)
+@Composable
+fun FormTaskPreview() {
+    NoteHaieTheme {
+        FormTask(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MainBackground)
+                .padding(16.dp),
+            title = "Titre du form",
+            {},
+            {},
+            {},
+            {},
+            {},
+            {},
+            buttonsContent = {}
+        )
+    }
+}
+
+@Preview(showBackground = false)
+@Composable
+fun TaskViewPreview() {
+    NoteHaieTheme {
+        TaskView(
+            ExempleTask.tasks[0]
+        )
     }
 }
