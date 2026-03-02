@@ -32,4 +32,5 @@
     <string name="selectionner_heure">Selectionner une heure</string>
     <string name="mention_obligatoire_avant">"* "</string>
     <string name="mention_obligatoire">Champ de saisie obligatoire</string>
+    <string name="vide" />
 </resources>

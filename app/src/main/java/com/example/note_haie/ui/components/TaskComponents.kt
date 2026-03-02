@@ -40,7 +40,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.note_haie.R
 import com.example.note_haie.model.EnumPeriodicyTask
-import com.example.note_haie.model.EnumStateTask
 import com.example.note_haie.model.EnumStateTimeTask
 import com.example.note_haie.model.ExempleTask
 import com.example.note_haie.model.Task
@@ -136,7 +135,7 @@ fun TaskView(task: Task) {
             )
 
             Text(
-                text = date.toString(),
+                text = date,
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier
                     .fillMaxWidth(),

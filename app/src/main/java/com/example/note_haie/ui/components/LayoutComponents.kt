@@ -28,7 +28,7 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -252,7 +252,7 @@ fun SelectBoxView(question: String, isRequired: Boolean, setSelectedOption: (Enu
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                 modifier = Modifier
                     .menuAnchor(
-                        type = MenuAnchorType.PrimaryNotEditable,
+                        type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
                         enabled = true
                     )
                     .fillMaxWidth(),
@@ -300,16 +300,20 @@ fun SelectTimeView(setDateResponse: (Long) -> Unit, setHourResponse: (Int) -> Un
     var selectedHour by remember { mutableStateOf<Int?>(null) }
     var selectedMinute by remember { mutableStateOf<Int?>(null) }
 
-    var textDateFormat by remember { mutableStateOf(if (dateIsRequired) {
-        "Cliquez pour chosir"
+    var textDateFormat by remember { mutableStateOf("Cliquez pour chosir")}
+    var textTimeFormat by remember { mutableStateOf("Cliquez pour chosir")}
+
+    if (dateIsRequired) {
+        textDateFormat = stringResource(R.string.cliquer_pour_choisir)
     } else {
-        ""
-    }) }
-    var textTimeFormat by remember { mutableStateOf(if (timeIsRequired) {
-        "Cliquez pour chosir"
+        textDateFormat = stringResource(R.string.vide)
+    }
+
+    if (timeIsRequired) {
+        textTimeFormat = stringResource(R.string.cliquer_pour_choisir)
     } else {
-        ""
-    }) }
+        textTimeFormat = stringResource(R.string.vide)
+    }
 
     Row (
         modifier = Modifier
