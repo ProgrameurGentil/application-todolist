@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Checkbox
@@ -37,6 +38,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.note_haie.model.EnumPeriodicyTask
+import com.example.note_haie.model.EnumStateTask
 import com.example.note_haie.model.EnumStateTimeTask
 import com.example.note_haie.model.ExempleTask
 import com.example.note_haie.model.Task
@@ -60,7 +62,7 @@ fun TaskView(task: Task) {
     val dateTime = if (task.date != null) {decomposeUnixTime(task.date)} else {decomposeUnixTime(0)}
     val stateTime = task.stateTime
     val name = task.name
-    val date = if (dateTime.year > 0) {"le ${dateTime.day} ${dateTime.month} ${dateTime.year} à ${dateTime.hour}h${dateTime.minute}"} else "Aucune date définit"
+    val date = if (task.periodicy != EnumPeriodicyTask.SINGLE) {"le ${dateTime.day} ${dateTime.month} ${dateTime.year} à ${dateTime.hour}h${dateTime.minute}"} else "Aucune date définit"
 
     val bgTimeStateIndicator = when (stateTime) {
         EnumStateTimeTask.LATE -> Red
@@ -330,61 +332,90 @@ fun FormTask(
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.headlineMedium,
-            color = White
-        )
+        Column(
+            horizontalAlignment = Alignment.Start,
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.headlineMedium,
+                color = White
+            )
 
-        Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-        EntryView(
-            question = "Titre",
-            placeholder = "Votre titre ici ...",
-            isRequired = true,
-            textColor = White,
-            setResponse = {
-                titleResponse = it
+            EntryView(
+                question = "Titre",
+                placeholder = "Votre titre ici ...",
+                isRequired = true,
+                textColor = White,
+                setResponse = {
+                    titleResponse = it
+                }
+            )
+
+            BigEntryView(
+                question = "Description",
+                placeholder = "Votre description ici ...",
+                isRequired = false,
+                textColor = White,
+                setResponse = {
+                    descriptionResponse = it
+                }
+            )
+
+            SelectBoxView(
+                question = "Periodicité",
+                isRequired = true,
+                textColor = White,
+                setSelectedOption = {
+                    periodicityResponse = it
+                }
+            )
+
+            if (dateIsRequired || timeIsRequired) {
+                SelectTimeView(
+                    setDateResponse = {
+                        dateResponse = it
+                    },
+                    setHourResponse = {
+                        hourResponse = it
+                    },
+                    setMinuteResponse = {
+                        minuteResponse = it
+                    },
+                    dateIsRequired = dateIsRequired,
+                    timeIsRequired = timeIsRequired
+                )
+            } else {
+                Spacer(modifier = Modifier.height(10.dp))
             }
-        )
 
-        BigEntryView(
-            question = "Description",
-            placeholder = "Votre description ici ...",
-            isRequired = false,
-            textColor = White,
-            setResponse = {
-                descriptionResponse = it
-            }
-        )
-
-        SelectBoxView(
-            question = "Periodicité",
-            isRequired = true,
-            textColor = White,
-            setSelectedOption = {
-                periodicityResponse = it
-            }
-        )
-
-        SelectTimeView(
-            setDateResponse = {
-                dateResponse = it
-            },
-            setHourResponse = {
-                hourResponse = it
-            },
-            setMinuteResponse = {
-                minuteResponse = it
-            },
-            dateIsRequired = dateIsRequired,
-            timeIsRequired = timeIsRequired
-        )
-
-        LabelRequired()
+            LabelRequired()
+        }
 
         buttonsContent()
     }
+}
+
+@Composable
+fun ErrorModal(title: String, text: String, onDismiss: () -> Unit) {
+    AlertDialog(
+        title = {
+            Text(text = title)
+        },
+        text = {
+            Text(text = text)
+        },
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(
+                onClick = {onDismiss()}
+            ) {
+                Text("Ok")
+            }
+        },
+        dismissButton = {}
+    )
 }
 
 /* Previews */
@@ -416,6 +447,18 @@ fun TaskViewPreview() {
     NoteHaieTheme {
         TaskView(
             ExempleTask.tasks[0]
+        )
+    }
+}
+
+@Preview(showBackground = false)
+@Composable
+fun ErrorModalPreview() {
+    NoteHaieTheme {
+        ErrorModal(
+            "Titre de l'erreur",
+            "Je suis une erreur !!",
+            {}
         )
     }
 }

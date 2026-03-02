@@ -301,8 +301,16 @@ fun SelectTimeView(setDateResponse: (Long) -> Unit, setHourResponse: (Int) -> Un
     var selectedHour by remember { mutableStateOf<Int?>(null) }
     var selectedMinute by remember { mutableStateOf<Int?>(null) }
 
-    var textDateFormat by remember { mutableStateOf("Cliquez pour chosir") }
-    var textTimeFormat by remember { mutableStateOf("Cliquez pour chosir") }
+    var textDateFormat by remember { mutableStateOf(if (dateIsRequired) {
+        "Cliquez pour chosir"
+    } else {
+        ""
+    }) }
+    var textTimeFormat by remember { mutableStateOf(if (timeIsRequired) {
+        "Cliquez pour chosir"
+    } else {
+        ""
+    }) }
 
     Row (
         modifier = Modifier
@@ -329,7 +337,8 @@ fun SelectTimeView(setDateResponse: (Long) -> Unit, setHourResponse: (Int) -> Un
                     .clickable(
                         enabled = true,
                         onClick = {
-                            showDatePickerModal = true
+                            if (dateIsRequired)
+                                showDatePickerModal = true
                         }
                     ),
                 contentAlignment = Alignment.Center
@@ -360,7 +369,8 @@ fun SelectTimeView(setDateResponse: (Long) -> Unit, setHourResponse: (Int) -> Un
                     .clickable(
                         enabled = true,
                         onClick = {
-                            showTimePickerModal = true
+                            if (timeIsRequired)
+                                showTimePickerModal = true
                         }
                     ),
                 contentAlignment = Alignment.Center
@@ -544,7 +554,7 @@ fun SelectBoxViewPreview() {
 fun SelectTimeViewPreview() {
     NoteHaieTheme {
         SelectTimeView(
-            {}, {}, {}, dateIsRequired = true, timeIsRequired = true
+            {}, {}, {}, dateIsRequired = false, timeIsRequired = true
         )
     }
 }
