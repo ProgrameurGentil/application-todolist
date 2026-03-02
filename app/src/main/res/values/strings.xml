@@ -1,3 +1,35 @@
 <resources>
     <string name="app_name">Note-Haie</string>
+    <string name="en_cours">En cours</string>
+    <string name="description_icon_fleche">fleche</string>
+    <string name="ajout_tache">Ajouter une tache</string>
+    <string name="annuler">Annuler</string>
+    <string name="valider">Valider</string>
+    <string name="champ_vide">Champ vide</string>
+    <string name="champ_vide_nom_tache">Vous avez oubliez de remplir le champ du titre de la tache</string>
+    <string name="nom_tache_defaut">Nom par défaut</string>
+    <string name="date_tache_defaut">Aucune date définit</string>
+    <string name="supprimer">Supprimer</string>
+    <string name="modifier">Modifier</string>
+    <string name="titre">Titre</string>
+    <string name="titre_ici">Votre titre ici…</string>
+    <string name="description">Description</string>
+    <string name="description_ici">Votre description ici…</string>
+    <string name="periodicite">Periodicité</string>
+    <string name="ok">OK</string>
+    <string name="periodicite_unique">Une seul fois</string>
+    <string name="periodicite_journalie">Tout les jours</string>
+    <string name="periodicite_hebdomadaire">Une fois par semaine</string>
+    <string name="periodicite_mensuelle">Une fois par mois</string>
+    <string name="description_icon_note_haie">Logo note haie</string>
+    <string name="description_icon_parametre">Icon des parametres</string>
+    <string name="description_bouton_ajout_tache">Bouton d\'ajout de tache</string>
+    <string name="mention_obligatoire_apres"> *</string>
+    <string name="cliquer_pour_choisir">Cliquez pour chosir</string>
+    <string name="nom_champ_date">Date :</string>
+    <string name="nom_champ_heure">Heure :</string>
+    <string name="selectionner">Selectionner</string>
+    <string name="selectionner_heure">Selectionner une heure</string>
+    <string name="mention_obligatoire_avant">"* "</string>
+    <string name="mention_obligatoire">Champ de saisie obligatoire</string>
 </resources>

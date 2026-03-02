@@ -35,8 +35,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.note_haie.R
 import com.example.note_haie.model.EnumPeriodicyTask
 import com.example.note_haie.model.EnumStateTask
 import com.example.note_haie.model.EnumStateTimeTask
@@ -207,15 +209,15 @@ fun PanelTask(task: Task?, isVisible: Boolean, onDismiss: () -> Unit) {
                         ) {
                             val dateTime = decomposeUnixTime(task?.date ?: 0)
                             Text(
-                                text = task?.name ?: "Nom par défaut",
+                                text = task?.name ?: stringResource(R.string.nom_tache_defaut),
                                 style = MaterialTheme.typography.headlineSmall
                             )
                             Text(
-                                text = if (dateTime.year > 0) {"le ${dateTime.day} ${dateTime.month} ${dateTime.year} à ${dateTime.hour}h${dateTime.minute}"} else "Aucune date définit",
+                                text = if (task?.periodicy != EnumPeriodicyTask.SINGLE) {"le ${dateTime.day} ${dateTime.month} ${dateTime.year} à ${dateTime.hour}h${dateTime.minute}"} else stringResource(R.string.date_tache_defaut),
                                 style = MaterialTheme.typography.titleMedium
                             )
                             Text(
-                                text = task?.description ?: "Description par defaut",
+                                text = task?.description ?: "",
                                 style = MaterialTheme.typography.titleLarge,
                             )
                         }
@@ -240,7 +242,7 @@ fun PanelTask(task: Task?, isVisible: Boolean, onDismiss: () -> Unit) {
                         colors = ButtonColors(LightRed, Black, LightRed, LightRed)
                     ) {
                         Text(
-                            text = "Supprimer",
+                            text = stringResource(R.string.supprimer),
                             style = MaterialTheme.typography.titleLarge
                         )
                     }
@@ -250,7 +252,7 @@ fun PanelTask(task: Task?, isVisible: Boolean, onDismiss: () -> Unit) {
                         colors = ButtonColors(LightGreen, Black, LightGreen, LightGreen)
                     ) {
                         Text(
-                            text = "Modifier",
+                            text = stringResource(R.string.modifier),
                             style = MaterialTheme.typography.titleLarge
                         )
                     }
@@ -344,8 +346,8 @@ fun FormTask(
             Spacer(modifier = Modifier.height(20.dp))
 
             EntryView(
-                question = "Titre",
-                placeholder = "Votre titre ici ...",
+                question = stringResource(R.string.titre),
+                placeholder = stringResource(R.string.titre_ici),
                 isRequired = true,
                 textColor = White,
                 setResponse = {
@@ -354,8 +356,8 @@ fun FormTask(
             )
 
             BigEntryView(
-                question = "Description",
-                placeholder = "Votre description ici ...",
+                question = stringResource(R.string.description),
+                placeholder = stringResource(R.string.description_ici),
                 isRequired = false,
                 textColor = White,
                 setResponse = {
@@ -364,7 +366,7 @@ fun FormTask(
             )
 
             SelectBoxView(
-                question = "Periodicité",
+                question = stringResource(R.string.periodicite),
                 isRequired = true,
                 textColor = White,
                 setSelectedOption = {
@@ -411,7 +413,7 @@ fun ErrorModal(title: String, text: String, onDismiss: () -> Unit) {
             TextButton(
                 onClick = {onDismiss()}
             ) {
-                Text("Ok")
+                Text(stringResource(R.string.ok))
             }
         },
         dismissButton = {}

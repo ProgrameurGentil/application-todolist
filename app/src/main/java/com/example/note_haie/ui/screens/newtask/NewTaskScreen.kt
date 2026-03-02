@@ -16,9 +16,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.example.note_haie.R
 import com.example.note_haie.database.task.toEntity
 import com.example.note_haie.model.EnumPeriodicyTask
 import com.example.note_haie.model.EnumStateTask
@@ -79,7 +81,7 @@ fun NewTaskScreenContent(addTask: suspend (Task) -> Unit, navigateToBack: () -> 
                 .weight(1f)
                 .background(MainBackground)
                 .padding(16.dp),
-            title = "Ajouter une tache",
+            title = stringResource(R.string.ajout_tache),
             setTitleResponse = {
                 titleResponse = it
             },
@@ -105,7 +107,7 @@ fun NewTaskScreenContent(addTask: suspend (Task) -> Unit, navigateToBack: () -> 
                     horizontalArrangement = Arrangement.End
                 ) {
                     ButtonView(
-                        text = "Annuler",
+                        text = stringResource(R.string.annuler),
                         colors = ButtonColors(LightRed, Black, LightRed, LightRed),
                         onClick = {
                             if (!navigateToBack())
@@ -114,7 +116,7 @@ fun NewTaskScreenContent(addTask: suspend (Task) -> Unit, navigateToBack: () -> 
                     )
 
                     ButtonView(
-                        text = "Valider",
+                        text = stringResource(R.string.valider),
                         colors = ButtonColors(LightGreen, Black, LightGreen, LightGreen),
                         onClick = {
                             scope.launch {

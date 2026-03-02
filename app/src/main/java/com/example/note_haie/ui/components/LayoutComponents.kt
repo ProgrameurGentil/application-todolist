@@ -6,7 +6,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -46,8 +45,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
@@ -84,14 +83,14 @@ fun HeaderView(showParameter: Boolean = true) {
         ) {
             Image(
                 painter = painterResource(id = R.drawable.logo_note_haie),
-                contentDescription = "Logo note haie",
+                contentDescription = stringResource(R.string.description_icon_note_haie),
                 modifier = Modifier.size(40.dp)
             )
 
             if (showParameter) {
                 Image(
                     painter = painterResource(id = R.drawable.icon_parametres),
-                    contentDescription = "Icon des parametres",
+                    contentDescription = stringResource(R.string.description_icon_parametre),
                     modifier = Modifier.size(32.dp)
                 )
             }
@@ -117,7 +116,7 @@ fun FloatingButton(onClick: () -> Unit = {}) {
         containerColor = MaterialTheme.colorScheme.secondaryContainer,
         contentColor = MaterialTheme.colorScheme.secondary
     ) {
-        Icon(Icons.Filled.Add, "Bouton d'ajout de tache")
+        Icon(Icons.Filled.Add, stringResource(R.string.description_bouton_ajout_tache))
     }
 }
 
@@ -130,7 +129,7 @@ fun TitleEntryView(question: String, isRequired: Boolean, textColor: Color = Whi
             }
             if (isRequired) {
                 withStyle(style = SpanStyle(color = Red)) {
-                    append(" *")
+                    append(stringResource(R.string.mention_obligatoire_apres))
                 }
             }
         },
@@ -323,7 +322,7 @@ fun SelectTimeView(setDateResponse: (Long) -> Unit, setHourResponse: (Int) -> Un
                 .weight(0.6f)
         ) {
             TitleEntryView(
-                question = "Date :",
+                question = stringResource(R.string.nom_champ_date),
                 isRequired = dateIsRequired
             )
             Box(
@@ -355,7 +354,7 @@ fun SelectTimeView(setDateResponse: (Long) -> Unit, setHourResponse: (Int) -> Un
                 .weight(0.5f)
         ) {
             TitleEntryView(
-                question = "Heure :",
+                question = stringResource(R.string.nom_champ_heure),
                 isRequired = timeIsRequired
             )
             Box(
@@ -426,12 +425,12 @@ fun DatePickerModal(onDateSelected: (Long?) -> Unit, onDismiss: () -> Unit) {
                 onDateSelected(datePickerState.selectedDateMillis)
                 onDismiss()
             }) {
-                Text("Selectionner")
+                Text(stringResource(R.string.selectionner))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Annuler")
+                Text(stringResource(R.string.annuler))
             }
         }
     ) {
@@ -451,7 +450,7 @@ fun TimePickerModal(onTimeSelected: (Int, Int) -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(text = "Selectionner une heure", style = MaterialTheme.typography.bodyMedium)
+            Text(text = stringResource(R.string.selectionner_heure), style = MaterialTheme.typography.bodyMedium)
         },
         text = {
             Column{
@@ -466,14 +465,14 @@ fun TimePickerModal(onTimeSelected: (Int, Int) -> Unit, onDismiss: () -> Unit) {
                     onTimeSelected(timePickerState.hour, timePickerState.minute)
                 }
             ) {
-                Text(text = "Selectioner")
+                Text(text = stringResource(R.string.selectionner))
             }
         },
         dismissButton = {
             TextButton(
                 onClick = { onDismiss() }
             ) {
-                Text(text = "Annuler")
+                Text(text = stringResource(R.string.annuler))
             }
         },
 
@@ -485,10 +484,10 @@ fun LabelRequired(textColor: Color = White) {
     Text(
         buildAnnotatedString {
             withStyle(style = SpanStyle(color = Red)) {
-                append("* ")
+                append(stringResource(R.string.mention_obligatoire_avant))
             }
             withStyle(style = SpanStyle(color = textColor)) {
-                append("Champ de saisie obligatoire")
+                append(stringResource(R.string.mention_obligatoire))
             }
         },
         modifier = Modifier.padding(vertical = 5.dp),

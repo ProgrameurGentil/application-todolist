@@ -30,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -94,14 +95,14 @@ fun HomeScreenContent(tasks: List<Task>, navigateToNewTask: () -> Unit) {
                     ) {
                         Text(
                             modifier = Modifier.padding(end = 5.dp),
-                            text = "En cours",
+                            text = stringResource(R.string.en_cours),
                             style = MaterialTheme.typography.titleLarge,
                             color = LightWhite
                         )
 
                         Image(
                             painter = painterResource(arrowRetracted),
-                            contentDescription = "fleche",
+                            contentDescription = stringResource(R.string.description_icon_fleche),
                             modifier = Modifier
                                 .size(25.dp)
                                 .padding(top = 4.dp),
