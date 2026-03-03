@@ -59,7 +59,7 @@ import com.example.note_haie.utils.decomposeUnixTime
 import com.example.note_haie.utils.getDateWithUnixTime
 
 @Composable
-fun TaskView(task: Task) {
+fun TaskView(task: Task, onValidatedTask: (Task, Boolean) -> Unit) {
     val dateTime = if (task.date != null) {decomposeUnixTime(task.date)} else {decomposeUnixTime(0)}
     val stateTime = task.stateTime
     val name = task.name
@@ -71,7 +71,8 @@ fun TaskView(task: Task) {
         else -> Green
     }
 
-    var checked by remember { task.isValidated }
+    var checked by remember(task) { task.isValidated }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -90,7 +91,10 @@ fun TaskView(task: Task) {
         ) {
             Checkbox(
                 checked = checked,
-                onCheckedChange = { checked = it },
+                onCheckedChange = {
+                        checked = it
+                        onValidatedTask(task, it)
+                    },
                 modifier = Modifier.scale(1.5f)
             )
         }
@@ -146,7 +150,7 @@ fun TaskView(task: Task) {
 }
 
 @Composable
-fun TaskButton(task: Task, onClick: () -> Unit) {
+fun TaskButton(task: Task, onClick: () -> Unit, onValidatedTask: (Task, Boolean) -> Unit) {
     TextButton(
         onClick = { onClick() },
         modifier = Modifier
@@ -154,111 +158,114 @@ fun TaskButton(task: Task, onClick: () -> Unit) {
         contentPadding = PaddingValues(0.dp),
         shape = RectangleShape
     ) {
-        TaskView(task)
+        TaskView(task, onValidatedTask)
     }
 }
 
 @Composable
-fun PanelTask(task: Task?, isVisible: Boolean, onDismiss: () -> Unit) {
-    if (isVisible) {
-        var checked by remember { task?.isValidated ?: mutableStateOf(false) }
+fun PanelTask(task: Task, onValidatedTask: (Task, Boolean) -> Unit, onDismiss: () -> Unit) {
 
-        ModalBottomSheet(
+    var checked by remember(task) { task.isValidated }
+
+    ModalBottomSheet(
+        modifier = Modifier
+            .fillMaxHeight(),
+        containerColor = LightNightBlue,
+        contentColor = Black,
+        onDismissRequest = onDismiss
+    ) {
+        Column(
             modifier = Modifier
-                .fillMaxHeight(),
-            containerColor = LightNightBlue,
-            contentColor = Black,
-            onDismissRequest = onDismiss
+                .padding(16.dp),
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
             Column(
                 modifier = Modifier
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.SpaceBetween
             ) {
-                Column(
+                Row(
                     modifier = Modifier
+                        .fillMaxWidth()
+                        .height(IntrinsicSize.Min),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
+                    Box(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .height(IntrinsicSize.Min),
-                        verticalAlignment = Alignment.CenterVertically
+                            .size(30.dp)
+                            .fillMaxHeight()
+                        ,
+                        contentAlignment = Alignment.TopCenter
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(30.dp)
-                                .fillMaxHeight()
-                            ,
-                            contentAlignment = Alignment.TopCenter
-                        ) {
-                            Checkbox(
-                                checked = checked,
-                                onCheckedChange = { checked = it },
-                                modifier = Modifier.scale(1.5f)
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.width(30.dp))
-
-                        Column(
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxHeight(),
-                            horizontalAlignment = Alignment.Start
-                        ) {
-                            val dateTime = decomposeUnixTime(task?.date ?: 0)
-                            Text(
-                                text = task?.name ?: stringResource(R.string.nom_tache_defaut),
-                                style = MaterialTheme.typography.headlineSmall
-                            )
-                            Text(
-                                text = if (task?.periodicy != EnumPeriodicyTask.SINGLE) {"le ${dateTime.day} ${dateTime.month} ${dateTime.year} à ${dateTime.hour}h${dateTime.minute}"} else stringResource(R.string.date_tache_defaut),
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Text(
-                                text = task?.description ?: "",
-                                style = MaterialTheme.typography.titleLarge,
-                            )
-                        }
+                        Checkbox(
+                            checked = checked,
+                            onCheckedChange = {
+                                    checked = it
+                                    onValidatedTask(task, it)
+                                },
+                            modifier = Modifier.scale(1.5f)
+                        )
                     }
 
-                    HorizontalDivider(thickness = 2.dp, modifier = Modifier.padding(vertical = 20.dp))
-                    if (task != null && task.stateTime != EnumStateTimeTask.NONE) {
+                    Spacer(modifier = Modifier.width(30.dp))
+
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(),
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        val dateTime = decomposeUnixTime(task.date ?: 0)
                         Text(
-                            text = "État : ${task.stateTime.label}",
+                            text = task.name,
+                            style = MaterialTheme.typography.headlineSmall
+                        )
+                        Text(
+                            text = if (task.periodicy != EnumPeriodicyTask.SINGLE) {"le ${dateTime.day} ${dateTime.month} ${dateTime.year} à ${dateTime.hour}h${dateTime.minute}"} else stringResource(R.string.date_tache_defaut),
                             style = MaterialTheme.typography.titleMedium
                         )
+                        Text(
+                            text = task.description,
+                            style = MaterialTheme.typography.titleLarge,
+                        )
                     }
-
-                    Spacer(modifier = Modifier.height(10.dp))
                 }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
+
+                HorizontalDivider(thickness = 2.dp, modifier = Modifier.padding(vertical = 20.dp))
+                if (task.stateTime != EnumStateTimeTask.NONE) {
+                    Text(
+                        text = "État : ${task.stateTime.label}",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                Button(
+                    onClick = { },
+                    colors = ButtonColors(LightRed, Black, LightRed, LightRed)
                 ) {
-                    Button(
-                        onClick = { },
-                        colors = ButtonColors(LightRed, Black, LightRed, LightRed)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.supprimer),
-                            style = MaterialTheme.typography.titleLarge
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Button(
-                        onClick = { },
-                        colors = ButtonColors(LightGreen, Black, LightGreen, LightGreen)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.modifier),
-                            style = MaterialTheme.typography.titleLarge
-                        )
-                    }
+                    Text(
+                        text = stringResource(R.string.supprimer),
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Button(
+                    onClick = { },
+                    colors = ButtonColors(LightGreen, Black, LightGreen, LightGreen)
+                ) {
+                    Text(
+                        text = stringResource(R.string.modifier),
+                        style = MaterialTheme.typography.titleLarge
+                    )
                 }
             }
         }
     }
+
 }
 
 @Composable
@@ -447,7 +454,8 @@ fun FormTaskPreview() {
 fun TaskViewPreview() {
     NoteHaieTheme {
         TaskView(
-            ExempleTask.tasks[0]
+            ExempleTask.tasks[0],
+            {_, _ ->}
         )
     }
 }
@@ -459,7 +467,7 @@ fun ErrorModalPreview() {
         ErrorModal(
             "Titre de l'erreur",
             "Je suis une erreur !!",
-            {}
+            onDismiss = {}
         )
     }
 }

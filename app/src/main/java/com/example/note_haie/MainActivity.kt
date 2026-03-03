@@ -81,7 +81,7 @@ fun AppNavigation(viewModel: TaskViewModel) {
 @Composable
 fun HomeScreenPreview() {
     NoteHaieTheme {
-        HomeScreenContent(ExempleTask.tasks, { })
+        HomeScreenContent(ExempleTask.tasks, {_, _ ->  }, {})
     }
 }
 
@@ -95,10 +95,10 @@ fun NewTaskScreenPreview() {
 
 @Composable
 fun ParameterScreen() { //navController: NavHostController
-    TODO("Not yet implemented")
+    // TODO("Not yet implemented")
 }
 
 @Composable
 fun UpdateTaskScreen() { //navController: NavHostController
-    TODO("Not yet implemented")
+    // TODO("Not yet implemented")
 }

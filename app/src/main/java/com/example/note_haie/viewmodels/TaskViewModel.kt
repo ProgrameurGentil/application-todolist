@@ -8,6 +8,7 @@ import com.example.note_haie.database.task.toDomain
 import com.example.note_haie.model.Task
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlin.collections.map
 
 class TaskViewModel(private val taskDao: TaskDao): ViewModel() {
 
@@ -29,6 +30,8 @@ class TaskViewModel(private val taskDao: TaskDao): ViewModel() {
         .map { entities ->
             entities.map { it.toDomain() }
         }
+
+    fun getTaskWithId(id: Int): Task = taskDao.getTaskWithId(id).toDomain()
 
     suspend fun insertTask(taskEntity: TaskEntity) = taskDao.insert(taskEntity)
 }
