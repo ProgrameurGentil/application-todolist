@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import com.example.note_haie.model.Task
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -15,7 +16,7 @@ interface TaskDao {
     suspend fun deleteTask(id: Int)
 
     @Update
-    suspend fun updateTask(task: TaskEntity)
+    suspend fun updateTask(task: TaskEntity): Int
 
     @Insert
     suspend fun insert(task: TaskEntity)
@@ -25,4 +26,7 @@ interface TaskDao {
 
     @Query("SELECT * FROM tasks WHERE is_validated == False")
     fun getNotValidatedTask(): Flow<List<TaskEntity>>
+
+    @Query("SELECT * FROM tasks WHERE id == :id")
+    fun getTaskWithId(id: Int): Flow<TaskEntity?>
 }

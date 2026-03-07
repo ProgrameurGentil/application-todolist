@@ -26,6 +26,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,7 +60,7 @@ import com.example.note_haie.utils.decomposeUnixTime
 import com.example.note_haie.utils.getDateWithUnixTime
 
 @Composable
-fun TaskView(task: Task) {
+fun TaskView(task: Task, onValidatedTask: (Task, Boolean) -> Unit) {
     val dateTime = if (task.date != null) {decomposeUnixTime(task.date)} else {decomposeUnixTime(0)}
     val stateTime = task.stateTime
     val name = task.name
@@ -71,7 +72,8 @@ fun TaskView(task: Task) {
         else -> Green
     }
 
-    var checked by remember { task.isValidated }
+    var checked by remember(task) { task.isValidated }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -90,7 +92,10 @@ fun TaskView(task: Task) {
         ) {
             Checkbox(
                 checked = checked,
-                onCheckedChange = { checked = it },
+                onCheckedChange = {
+                        checked = it
+                        onValidatedTask(task, it)
+                    },
                 modifier = Modifier.scale(1.5f)
             )
         }
@@ -146,7 +151,7 @@ fun TaskView(task: Task) {
 }
 
 @Composable
-fun TaskButton(task: Task, onClick: () -> Unit) {
+fun TaskButton(task: Task, onClick: () -> Unit, onValidatedTask: (Task, Boolean) -> Unit) {
     TextButton(
         onClick = { onClick() },
         modifier = Modifier
@@ -154,107 +159,109 @@ fun TaskButton(task: Task, onClick: () -> Unit) {
         contentPadding = PaddingValues(0.dp),
         shape = RectangleShape
     ) {
-        TaskView(task)
+        TaskView(task, onValidatedTask)
     }
 }
 
 @Composable
-fun PanelTask(task: Task?, isVisible: Boolean, onDismiss: () -> Unit) {
-    if (isVisible) {
-        var checked by remember { task?.isValidated ?: mutableStateOf(false) }
+fun PanelTask(task: Task, onValidatedTask: (Task, Boolean) -> Unit, onDismiss: () -> Unit, onClickUpdate: () -> Unit) {
 
-        ModalBottomSheet(
+    var checked by remember(task) { task.isValidated }
+
+    ModalBottomSheet(
+        modifier = Modifier
+            .fillMaxHeight(),
+        containerColor = LightNightBlue,
+        contentColor = Black,
+        onDismissRequest = onDismiss
+    ) {
+        Column(
             modifier = Modifier
-                .fillMaxHeight(),
-            containerColor = LightNightBlue,
-            contentColor = Black,
-            onDismissRequest = onDismiss
+                .padding(16.dp),
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
             Column(
                 modifier = Modifier
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.SpaceBetween
             ) {
-                Column(
+                Row(
                     modifier = Modifier
+                        .fillMaxWidth()
+                        .height(IntrinsicSize.Min),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
+                    Box(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .height(IntrinsicSize.Min),
-                        verticalAlignment = Alignment.CenterVertically
+                            .size(30.dp)
+                            .fillMaxHeight()
+                        ,
+                        contentAlignment = Alignment.TopCenter
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(30.dp)
-                                .fillMaxHeight()
-                            ,
-                            contentAlignment = Alignment.TopCenter
-                        ) {
-                            Checkbox(
-                                checked = checked,
-                                onCheckedChange = { checked = it },
-                                modifier = Modifier.scale(1.5f)
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.width(30.dp))
-
-                        Column(
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxHeight(),
-                            horizontalAlignment = Alignment.Start
-                        ) {
-                            val dateTime = decomposeUnixTime(task?.date ?: 0)
-                            Text(
-                                text = task?.name ?: stringResource(R.string.nom_tache_defaut),
-                                style = MaterialTheme.typography.headlineSmall
-                            )
-                            Text(
-                                text = if (task?.periodicy != EnumPeriodicyTask.SINGLE) {"le ${dateTime.day} ${dateTime.month} ${dateTime.year} à ${dateTime.hour}h${dateTime.minute}"} else stringResource(R.string.date_tache_defaut),
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Text(
-                                text = task?.description ?: "",
-                                style = MaterialTheme.typography.titleLarge,
-                            )
-                        }
+                        Checkbox(
+                            checked = checked,
+                            onCheckedChange = {
+                                    checked = it
+                                    onValidatedTask(task, it)
+                                },
+                            modifier = Modifier.scale(1.5f)
+                        )
                     }
 
-                    HorizontalDivider(thickness = 2.dp, modifier = Modifier.padding(vertical = 20.dp))
-                    if (task != null && task.stateTime != EnumStateTimeTask.NONE) {
+                    Spacer(modifier = Modifier.width(30.dp))
+
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(),
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        val dateTime = decomposeUnixTime(task.date ?: 0)
                         Text(
-                            text = "État : ${task.stateTime.label}",
+                            text = task.name,
+                            style = MaterialTheme.typography.headlineSmall
+                        )
+                        Text(
+                            text = if (task.periodicy != EnumPeriodicyTask.SINGLE) {"le ${dateTime.day} ${dateTime.month} ${dateTime.year} à ${dateTime.hour}h${dateTime.minute}"} else stringResource(R.string.date_tache_defaut),
                             style = MaterialTheme.typography.titleMedium
                         )
+                        Text(
+                            text = task.description,
+                            style = MaterialTheme.typography.titleLarge,
+                        )
                     }
-
-                    Spacer(modifier = Modifier.height(10.dp))
                 }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
+
+                HorizontalDivider(thickness = 2.dp, modifier = Modifier.padding(vertical = 20.dp))
+                if (task.stateTime != EnumStateTimeTask.NONE) {
+                    Text(
+                        text = "État : ${task.stateTime.label}",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                Button(
+                    onClick = { },
+                    colors = ButtonColors(LightRed, Black, LightRed, LightRed)
                 ) {
-                    Button(
-                        onClick = { },
-                        colors = ButtonColors(LightRed, Black, LightRed, LightRed)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.supprimer),
-                            style = MaterialTheme.typography.titleLarge
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Button(
-                        onClick = { },
-                        colors = ButtonColors(LightGreen, Black, LightGreen, LightGreen)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.modifier),
-                            style = MaterialTheme.typography.titleLarge
-                        )
-                    }
+                    Text(
+                        text = stringResource(R.string.supprimer),
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Button(
+                    onClick = onClickUpdate,
+                    colors = ButtonColors(LightGreen, Black, LightGreen, LightGreen)
+                ) {
+                    Text(
+                        text = stringResource(R.string.modifier),
+                        style = MaterialTheme.typography.titleLarge
+                    )
                 }
             }
         }
@@ -279,25 +286,25 @@ fun FormTask(
      * Avoir, je pense qu'on peux retirer les *Response et laisser le set*Response
      * Il faut voir avec la modification des taches (Version 1)
      */
-    var titleResponse by remember { mutableStateOf<String?>(null) }
-    var descriptionResponse by remember { mutableStateOf<String?>(null) }
-    var periodicityResponse by remember { mutableStateOf<EnumPeriodicyTask?>(null) }
     var hourResponse by remember { mutableStateOf<Int?>(null) }
     var minuteResponse by remember { mutableStateOf<Int?>(null) }
     var dateResponse  by remember { mutableStateOf<Long?>(null) }
 
     var dateIsRequired by remember { mutableStateOf(false) }
     var timeIsRequired by remember { mutableStateOf(false) }
-    periodicityResponse?.let {
-        when(it) {
+
+    val changePeriodicy = { newPeriodicy: EnumPeriodicyTask ->
+        when(newPeriodicy) {
             EnumPeriodicyTask.DAILY -> {
                 dateIsRequired = false
                 timeIsRequired = true
             }
-            EnumPeriodicyTask.WEEKLY  -> {
+
+            EnumPeriodicyTask.WEEKLY -> {
                 dateIsRequired = true
                 timeIsRequired = true
             }
+
             EnumPeriodicyTask.MONTHLY -> {
                 dateIsRequired = true
                 timeIsRequired = true
@@ -309,24 +316,19 @@ fun FormTask(
         }
     }
 
-    task?.let {
-        titleResponse = it.name
-        descriptionResponse = it.description
-        periodicityResponse = it.periodicy
-        it.date?.let {date ->
-            val dateTime = decomposeUnixTime(date)
-            minuteResponse = dateTime.minute
-            hourResponse = dateTime.hour
-            dateResponse = getDateWithUnixTime(date)
+    LaunchedEffect(task) {
+        task?.let {
+            changePeriodicy(task.periodicy)
+            it.date?.let {date ->
+                val dateTime = decomposeUnixTime(date)
+                minuteResponse = dateTime.minute
+                hourResponse = dateTime.hour
+                dateResponse = getDateWithUnixTime(date)
+            }
         }
     }
 
-    titleResponse?.let { setTitleResponse(it) }
-    descriptionResponse?.let { setDescriptionResponse(it) }
-    periodicityResponse?.let { setPeriodicyResponse(it) }
-    hourResponse?.let { setHourResponse(it) }
-    minuteResponse?.let { setMinuteResponse(it) }
-    dateResponse?.let { setDateResponse(it) }
+
 
     Column(
         modifier = modifier,
@@ -349,8 +351,9 @@ fun FormTask(
                 placeholder = stringResource(R.string.titre_ici),
                 isRequired = true,
                 textColor = White,
+                valueResponse =  task?.name ?: "",
                 setResponse = {
-                    titleResponse = it
+                    setTitleResponse(it)
                 }
             )
 
@@ -359,8 +362,9 @@ fun FormTask(
                 placeholder = stringResource(R.string.description_ici),
                 isRequired = false,
                 textColor = White,
+                valueResponse = task?.description ?: "",
                 setResponse = {
-                    descriptionResponse = it
+                    setDescriptionResponse(it)
                 }
             )
 
@@ -368,20 +372,28 @@ fun FormTask(
                 question = stringResource(R.string.periodicite),
                 isRequired = true,
                 textColor = White,
+                optionValue = task?.periodicy,
                 setSelectedOption = {
-                    periodicityResponse = it
+                    setPeriodicyResponse(it)
+                    changePeriodicy(it)
                 }
             )
 
             if (dateIsRequired || timeIsRequired) {
                 SelectTimeView(
+                    valueDate = dateResponse,
                     setDateResponse = {
+                        setDateResponse(it)
                         dateResponse = it
                     },
+                    valueHour = hourResponse,
                     setHourResponse = {
+                        setHourResponse(it)
                         hourResponse = it
                     },
+                    valueMinute = minuteResponse,
                     setMinuteResponse = {
+                        setMinuteResponse(it)
                         minuteResponse = it
                     },
                     dateIsRequired = dateIsRequired,
@@ -431,12 +443,12 @@ fun FormTaskPreview() {
                 .background(MainBackground)
                 .padding(16.dp),
             title = "Titre du form",
-            {},
-            {},
-            {},
-            {},
-            {},
-            {},
+            setTitleResponse = {},
+            setDescriptionResponse = {},
+            setPeriodicyResponse = {},
+            setDateResponse = {},
+            setHourResponse = {},
+            setMinuteResponse = {},
             buttonsContent = {}
         )
     }
@@ -447,7 +459,8 @@ fun FormTaskPreview() {
 fun TaskViewPreview() {
     NoteHaieTheme {
         TaskView(
-            ExempleTask.tasks[0]
+            ExempleTask.tasks[0],
+            {_, _ ->}
         )
     }
 }
@@ -459,7 +472,7 @@ fun ErrorModalPreview() {
         ErrorModal(
             "Titre de l'erreur",
             "Je suis une erreur !!",
-            {}
+            onDismiss = {}
         )
     }
 }

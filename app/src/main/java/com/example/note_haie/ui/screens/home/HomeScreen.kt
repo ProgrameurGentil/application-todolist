@@ -26,6 +26,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,6 +36,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.note_haie.R
+import com.example.note_haie.database.task.toEntity
 import com.example.note_haie.model.ExempleTask
 import com.example.note_haie.model.Task
 import com.example.note_haie.ui.components.FloatingButton
@@ -46,19 +48,34 @@ import com.example.note_haie.ui.theme.LightWhite
 import com.example.note_haie.ui.theme.MainBackground
 import com.example.note_haie.ui.theme.NoteHaieTheme
 import com.example.note_haie.viewmodels.TaskViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(viewModel: TaskViewModel, navController: NavHostController) {
     val tasks by viewModel.fullTasks().collectAsState(initial = emptyList())
-
-    HomeScreenContent(tasks = tasks, { navController.navigate("new-task") })
+    val scope = rememberCoroutineScope()
+    HomeScreenContent(
+        tasks = tasks,
+        onValidatedTask = { task, newValue ->
+            scope.launch {
+                task.isValidated.value = newValue
+                viewModel.updateTask(task.toEntity())
+            }
+        },
+        navigateToNewTask = {
+            navController.navigate("new-task")
+        },
+        navigateToUpDateTask = { id ->
+            if (id <= 0) navController.navigate("home")
+            navController.navigate("update-task/$id")
+        }
+    )
 }
 
 @Composable
-fun HomeScreenContent(tasks: List<Task>, navigateToNewTask: () -> Unit) {
+fun HomeScreenContent(tasks: List<Task>, onValidatedTask: (Task, Boolean) -> Unit, navigateToNewTask: () -> Unit, navigateToUpDateTask: (Int) -> Unit) {
 
-    var showPanelTask by remember { mutableStateOf(false) }
-    var taskForPanelTask: Task? by remember { mutableStateOf(null) }
+    var taskSelected by remember { mutableStateOf<Task?>(null) }
 
     Scaffold(
         floatingActionButton = {
@@ -121,9 +138,9 @@ fun HomeScreenContent(tasks: List<Task>, navigateToNewTask: () -> Unit) {
                                 TaskButton(
                                     task = task,
                                     onClick = {
-                                        showPanelTask = true
-                                        taskForPanelTask = task
-                                    }
+                                        taskSelected = task
+                                    },
+                                    onValidatedTask = onValidatedTask
                                 )
                                 Spacer(modifier = Modifier.height(10.dp))
                             }
@@ -132,11 +149,17 @@ fun HomeScreenContent(tasks: List<Task>, navigateToNewTask: () -> Unit) {
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
-                PanelTask(
-                    task = taskForPanelTask,
-                    isVisible = showPanelTask,
-                    onDismiss = { showPanelTask = false }
-                )
+                taskSelected?.let {task ->
+                    PanelTask(
+                        task = task,
+                        onDismiss = { taskSelected = null },
+                        onValidatedTask = onValidatedTask,
+                        onClickUpdate = {
+                            taskSelected = null
+                            navigateToUpDateTask(task.id)
+                        }
+                    )
+                }
             }
 
             FooterView()
@@ -150,7 +173,9 @@ fun HomeScreenPreview() {
     NoteHaieTheme {
         HomeScreenContent(
             tasks = ExempleTask.tasks,
-            {  }
+            {_, _ -> },
+            {},
+            {}
         )
     }
 }

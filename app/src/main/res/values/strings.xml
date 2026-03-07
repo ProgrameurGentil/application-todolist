@@ -2,7 +2,7 @@
     <string name="app_name">Note-Haie</string>
     <string name="en_cours">En cours</string>
     <string name="description_icon_fleche">fleche</string>
-    <string name="ajout_tache">Ajouter une tache</string>
+    <string name="page_ajout_tache">Ajouter une tache</string>
     <string name="annuler">Annuler</string>
     <string name="valider">Valider</string>
     <string name="champ_vide">Champ vide</string>
@@ -33,4 +33,5 @@
     <string name="mention_obligatoire_avant">"* "</string>
     <string name="mention_obligatoire">Champ de saisie obligatoire</string>
     <string name="vide" />
+    <string name="page_modifier_tache">Modifier une tache</string>
 </resources>
