@@ -26,6 +26,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -163,7 +164,7 @@ fun TaskButton(task: Task, onClick: () -> Unit, onValidatedTask: (Task, Boolean)
 }
 
 @Composable
-fun PanelTask(task: Task, onValidatedTask: (Task, Boolean) -> Unit, onDismiss: () -> Unit) {
+fun PanelTask(task: Task, onValidatedTask: (Task, Boolean) -> Unit, onDismiss: () -> Unit, onClickUpdate: () -> Unit) {
 
     var checked by remember(task) { task.isValidated }
 
@@ -254,7 +255,7 @@ fun PanelTask(task: Task, onValidatedTask: (Task, Boolean) -> Unit, onDismiss: (
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 Button(
-                    onClick = { },
+                    onClick = onClickUpdate,
                     colors = ButtonColors(LightGreen, Black, LightGreen, LightGreen)
                 ) {
                     Text(
@@ -265,7 +266,6 @@ fun PanelTask(task: Task, onValidatedTask: (Task, Boolean) -> Unit, onDismiss: (
             }
         }
     }
-
 }
 
 @Composable
@@ -286,25 +286,25 @@ fun FormTask(
      * Avoir, je pense qu'on peux retirer les *Response et laisser le set*Response
      * Il faut voir avec la modification des taches (Version 1)
      */
-    var titleResponse by remember { mutableStateOf<String?>(null) }
-    var descriptionResponse by remember { mutableStateOf<String?>(null) }
-    var periodicityResponse by remember { mutableStateOf<EnumPeriodicyTask?>(null) }
     var hourResponse by remember { mutableStateOf<Int?>(null) }
     var minuteResponse by remember { mutableStateOf<Int?>(null) }
     var dateResponse  by remember { mutableStateOf<Long?>(null) }
 
     var dateIsRequired by remember { mutableStateOf(false) }
     var timeIsRequired by remember { mutableStateOf(false) }
-    periodicityResponse?.let {
-        when(it) {
+
+    val changePeriodicy = { newPeriodicy: EnumPeriodicyTask ->
+        when(newPeriodicy) {
             EnumPeriodicyTask.DAILY -> {
                 dateIsRequired = false
                 timeIsRequired = true
             }
-            EnumPeriodicyTask.WEEKLY  -> {
+
+            EnumPeriodicyTask.WEEKLY -> {
                 dateIsRequired = true
                 timeIsRequired = true
             }
+
             EnumPeriodicyTask.MONTHLY -> {
                 dateIsRequired = true
                 timeIsRequired = true
@@ -316,24 +316,19 @@ fun FormTask(
         }
     }
 
-    task?.let {
-        titleResponse = it.name
-        descriptionResponse = it.description
-        periodicityResponse = it.periodicy
-        it.date?.let {date ->
-            val dateTime = decomposeUnixTime(date)
-            minuteResponse = dateTime.minute
-            hourResponse = dateTime.hour
-            dateResponse = getDateWithUnixTime(date)
+    LaunchedEffect(task) {
+        task?.let {
+            changePeriodicy(task.periodicy)
+            it.date?.let {date ->
+                val dateTime = decomposeUnixTime(date)
+                minuteResponse = dateTime.minute
+                hourResponse = dateTime.hour
+                dateResponse = getDateWithUnixTime(date)
+            }
         }
     }
 
-    titleResponse?.let { setTitleResponse(it) }
-    descriptionResponse?.let { setDescriptionResponse(it) }
-    periodicityResponse?.let { setPeriodicyResponse(it) }
-    hourResponse?.let { setHourResponse(it) }
-    minuteResponse?.let { setMinuteResponse(it) }
-    dateResponse?.let { setDateResponse(it) }
+
 
     Column(
         modifier = modifier,
@@ -356,8 +351,9 @@ fun FormTask(
                 placeholder = stringResource(R.string.titre_ici),
                 isRequired = true,
                 textColor = White,
+                valueResponse =  task?.name ?: "",
                 setResponse = {
-                    titleResponse = it
+                    setTitleResponse(it)
                 }
             )
 
@@ -366,8 +362,9 @@ fun FormTask(
                 placeholder = stringResource(R.string.description_ici),
                 isRequired = false,
                 textColor = White,
+                valueResponse = task?.description ?: "",
                 setResponse = {
-                    descriptionResponse = it
+                    setDescriptionResponse(it)
                 }
             )
 
@@ -375,20 +372,28 @@ fun FormTask(
                 question = stringResource(R.string.periodicite),
                 isRequired = true,
                 textColor = White,
+                optionValue = task?.periodicy,
                 setSelectedOption = {
-                    periodicityResponse = it
+                    setPeriodicyResponse(it)
+                    changePeriodicy(it)
                 }
             )
 
             if (dateIsRequired || timeIsRequired) {
                 SelectTimeView(
+                    valueDate = dateResponse,
                     setDateResponse = {
+                        setDateResponse(it)
                         dateResponse = it
                     },
+                    valueHour = hourResponse,
                     setHourResponse = {
+                        setHourResponse(it)
                         hourResponse = it
                     },
+                    valueMinute = minuteResponse,
                     setMinuteResponse = {
+                        setMinuteResponse(it)
                         minuteResponse = it
                     },
                     dateIsRequired = dateIsRequired,
@@ -438,12 +443,12 @@ fun FormTaskPreview() {
                 .background(MainBackground)
                 .padding(16.dp),
             title = "Titre du form",
-            {},
-            {},
-            {},
-            {},
-            {},
-            {},
+            setTitleResponse = {},
+            setDescriptionResponse = {},
+            setPeriodicyResponse = {},
+            setDateResponse = {},
+            setHourResponse = {},
+            setMinuteResponse = {},
             buttonsContent = {}
         )
     }

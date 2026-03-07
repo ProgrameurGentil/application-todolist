@@ -16,7 +16,7 @@ interface TaskDao {
     suspend fun deleteTask(id: Int)
 
     @Update
-    suspend fun updateTask(task: TaskEntity)
+    suspend fun updateTask(task: TaskEntity): Int
 
     @Insert
     suspend fun insert(task: TaskEntity)
@@ -28,5 +28,5 @@ interface TaskDao {
     fun getNotValidatedTask(): Flow<List<TaskEntity>>
 
     @Query("SELECT * FROM tasks WHERE id == :id")
-    fun getTaskWithId(id: Int): TaskEntity
+    fun getTaskWithId(id: Int): Flow<TaskEntity?>
 }

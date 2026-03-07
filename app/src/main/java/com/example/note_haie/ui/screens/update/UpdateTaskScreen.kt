@@ -1,4 +1,4 @@
-package com.example.note_haie.ui.screens.newtask
+package com.example.note_haie.ui.screens.update
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ButtonColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,8 +24,7 @@ import androidx.navigation.NavHostController
 import com.example.note_haie.R
 import com.example.note_haie.database.task.toEntity
 import com.example.note_haie.model.EnumPeriodicyTask
-import com.example.note_haie.model.EnumStateTask
-import com.example.note_haie.model.EnumStateTimeTask
+import com.example.note_haie.model.ExempleTask
 import com.example.note_haie.model.Task
 import com.example.note_haie.ui.components.ButtonView
 import com.example.note_haie.ui.components.ErrorModal
@@ -36,40 +36,53 @@ import com.example.note_haie.ui.theme.LightGreen
 import com.example.note_haie.ui.theme.LightRed
 import com.example.note_haie.ui.theme.MainBackground
 import com.example.note_haie.ui.theme.NoteHaieTheme
+import com.example.note_haie.utils.decomposeUnixTime
+import com.example.note_haie.utils.getDateWithUnixTime
 import com.example.note_haie.viewmodels.TaskViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun NewTaskScreen(viewModel: TaskViewModel, navController: NavHostController) {
+fun UpdateTaskScreen(idTask: Int, viewModel: TaskViewModel, navController: NavHostController) {
+    val taskFlow = remember(idTask) { viewModel.getTaskWithId(idTask) }
+    val task by taskFlow.collectAsState(null)
     val scope = rememberCoroutineScope()
-    NewTaskScreenContent(
-        addTask = {task ->
-            scope.launch {
-                viewModel.insertTask(task.toEntity())
+
+    if (idTask <= 0) navController.navigate("home") // si la valeur par defaut est utilisé
+    //navController.navigate("home") // DEBUG
+    //TODO(faire qqc si task vaut null)
+    task?.let {
+        UpdateTaskScreenContent(
+            task = it,
+            navigateToBack = {
+                navController.popBackStack()
+            },
+            navigateToHome = {
+                navController.navigate("home")
+            },
+            updateTask = {task ->
+                scope.launch {
+                    val r = viewModel.updateTask(task.toEntity())
+                }
             }
-        },
-        navigateToBack = {
-            navController.popBackStack()
-        },
-        navigateToHome = {
-            navController.navigate("home")
-        }
-    )
+        )
+    }
+
 }
 
 @Composable
-fun NewTaskScreenContent(addTask: (Task) -> Unit, navigateToBack: () -> Boolean, navigateToHome: () -> Unit) {
-    var titleResponse by remember { mutableStateOf<String?>(null) }
-    var descriptionResponse by remember { mutableStateOf<String?>(null) }
-    var periodicityResponse by remember { mutableStateOf<EnumPeriodicyTask?>(null) }
-    var hourResponse by remember { mutableStateOf<Int?>(null) }
-    var minuteResponse by remember { mutableStateOf<Int?>(null) }
-    var dateResponse  by remember { mutableStateOf<Long?>(null) }
+fun UpdateTaskScreenContent(task: Task, navigateToBack: () -> Boolean, navigateToHome: () -> Unit, updateTask : (Task) -> Unit) {
+    var titleResponse by remember { mutableStateOf<String?>(task.name) }
+    var descriptionResponse by remember { mutableStateOf<String?>(task.description) }
+    var periodicityResponse by remember { mutableStateOf<EnumPeriodicyTask?>(task.periodicy) }
+    val date = decomposeUnixTime(task.date)
+    var hourResponse by remember { mutableStateOf<Int?>(date?.hour) }
+    var minuteResponse by remember { mutableStateOf<Int?>(date?.minute) }
+    var dateResponse  by remember { mutableStateOf<Long?>(getDateWithUnixTime(task.date)) }
 
+    val scope = rememberCoroutineScope()
     var showModalError by remember { mutableStateOf(false) }
     var titleModalError by remember { mutableStateOf("Erreur") }
     var textModalError by remember { mutableStateOf("") }
-
     Column(
         modifier = Modifier
             .fillMaxSize(),
@@ -83,7 +96,8 @@ fun NewTaskScreenContent(addTask: (Task) -> Unit, navigateToBack: () -> Boolean,
                 .weight(1f)
                 .background(MainBackground)
                 .padding(16.dp),
-            title = stringResource(R.string.page_ajout_tache),
+            title = stringResource(R.string.page_modifier_tache),
+            task = task,
             setTitleResponse = {
                 titleResponse = it
             },
@@ -118,7 +132,7 @@ fun NewTaskScreenContent(addTask: (Task) -> Unit, navigateToBack: () -> Boolean,
                     )
 
                     ButtonView(
-                        text = stringResource(R.string.valider),
+                        text = stringResource(R.string.modifier),
                         colors = ButtonColors(LightGreen, Black, LightGreen, LightGreen),
                         onClick = {
                             // TODO("faire dans les prochaines versions toutes les vérifications")
@@ -131,21 +145,20 @@ fun NewTaskScreenContent(addTask: (Task) -> Unit, navigateToBack: () -> Boolean,
                                 textModalError = "Vous avez oubliez de remplir le champ du titre de la tache"
                                 showModalError = true
                             } else {
-                                val task = Task(
-                                    id = 0,
-                                    name = title,
-                                    date = null,
-                                    description = descriptionResponse ?: "",
-                                    isValidated = mutableStateOf(false),
-                                    stateTime = EnumStateTimeTask.NONE,
-                                    state = EnumStateTask.NOT_REALISED,
-                                    periodicy = EnumPeriodicyTask.SINGLE,
-                                    file = null
+                                val newTask = Task(
+                                    id = task.id,
+                                    name = titleResponse ?: task.name,
+                                    date = null, //TODO
+                                    description = descriptionResponse ?: task.description,
+                                    isValidated = task.isValidated,
+                                    stateTime = task.stateTime,
+                                    state = task.state,
+                                    periodicy = periodicityResponse ?: task.periodicy,
+                                    file = task.file
                                 )
-                                addTask(task)
+                                updateTask(newTask)
                                 navigateToHome()
                             }
-
                         }
                     )
                 }
@@ -161,8 +174,8 @@ fun NewTaskScreenContent(addTask: (Task) -> Unit, navigateToBack: () -> Boolean,
 
 @Preview(showBackground = true)
 @Composable
-fun NewTaskScreenPreview() {
+fun UpdateTaskScreenPreview() {
     NoteHaieTheme {
-        NewTaskScreenContent({}, {true}, {})
+        UpdateTaskScreenContent(ExempleTask.tasks[0],{true}, {}, { _ ->})
     }
 }

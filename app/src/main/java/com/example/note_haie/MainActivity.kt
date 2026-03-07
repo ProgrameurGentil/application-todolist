@@ -9,15 +9,19 @@ import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.note_haie.database.AppDatabase
 import com.example.note_haie.model.ExempleTask
 import com.example.note_haie.ui.screens.home.HomeScreen
 import com.example.note_haie.ui.screens.home.HomeScreenContent
 import com.example.note_haie.ui.screens.newtask.NewTaskScreen
 import com.example.note_haie.ui.screens.newtask.NewTaskScreenContent
+import com.example.note_haie.ui.screens.update.UpdateTaskScreen
+import com.example.note_haie.ui.screens.update.UpdateTaskScreenContent
 import com.example.note_haie.ui.theme.NoteHaieTheme
 import com.example.note_haie.viewmodels.TaskViewModel
 import com.example.note_haie.viewmodels.TaskViewModelFactory
@@ -71,8 +75,13 @@ fun AppNavigation(viewModel: TaskViewModel) {
         composable("parameter") {
             ParameterScreen()
         }
-        composable("update-task") {
-            UpdateTaskScreen()
+        composable("update-task/{idTask}",
+            arguments = listOf(
+                navArgument("idTask") {type = NavType.IntType},
+            )
+        ) {backStackEntry ->
+            val idTask = backStackEntry.arguments?.getInt("idTask") ?: 0
+            UpdateTaskScreen(idTask, viewModel, navController)
         }
     }
 }
@@ -81,7 +90,7 @@ fun AppNavigation(viewModel: TaskViewModel) {
 @Composable
 fun HomeScreenPreview() {
     NoteHaieTheme {
-        HomeScreenContent(ExempleTask.tasks, {_, _ ->  }, {})
+        HomeScreenContent(ExempleTask.tasks, {_, _ ->  }, {}, {})
     }
 }
 
@@ -93,12 +102,15 @@ fun NewTaskScreenPreview() {
     }
 }
 
+@Preview(showBackground = true)
 @Composable
-fun ParameterScreen() { //navController: NavHostController
-    // TODO("Not yet implemented")
+fun UpdateTaskScreenPreview() {
+    NoteHaieTheme {
+        UpdateTaskScreenContent(ExempleTask.tasks[0], {true}, {}, {})
+    }
 }
 
 @Composable
-fun UpdateTaskScreen() { //navController: NavHostController
+fun ParameterScreen() { //navController: NavHostController
     // TODO("Not yet implemented")
 }

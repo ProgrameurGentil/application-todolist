@@ -19,7 +19,7 @@ class TaskViewModel(private val taskDao: TaskDao): ViewModel() {
 
     suspend fun deleteTask(id: Int) = taskDao.deleteTask(id)
 
-    suspend fun updateTask(taskEntity: TaskEntity) = taskDao.updateTask(taskEntity)
+    suspend fun updateTask(taskEntity: TaskEntity):Int = taskDao.updateTask(taskEntity)
 
     fun validatedTask(): Flow<List<Task>> = taskDao.getValidatedTask()
         .map { entities ->
@@ -31,7 +31,8 @@ class TaskViewModel(private val taskDao: TaskDao): ViewModel() {
             entities.map { it.toDomain() }
         }
 
-    fun getTaskWithId(id: Int): Task = taskDao.getTaskWithId(id).toDomain()
+    fun getTaskWithId(id: Int): Flow<Task?> = taskDao.getTaskWithId(id)
+        .map { it?.toDomain() }
 
     suspend fun insertTask(taskEntity: TaskEntity) = taskDao.insert(taskEntity)
 }

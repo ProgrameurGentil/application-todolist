@@ -62,6 +62,13 @@ fun decomposeUnixTime(unixTime: Long, zoneId: ZoneId = ZoneId.of("UTC")): DateTi
     )
 }
 
+fun decomposeUnixTime(unixTime: Long?, zoneId: ZoneId = ZoneId.of("UTC")): DateTimeComponent? {
+    if (unixTime != null) {
+        return decomposeUnixTime(unixTime)
+    }
+    return null
+}
+
 /**
  * Retourne la date (jour, mois, année) en format temps unix
  */
@@ -72,6 +79,13 @@ fun getDateWithUnixTime(unixTime: Long, zoneId: ZoneId = ZoneId.of("UTC")): Long
         .atStartOfDay(zoneId)
         .toInstant()
         .toEpochMilli()
+}
+
+fun getDateWithUnixTime(unixTime: Long?, zoneId: ZoneId = ZoneId.of("UTC")): Long? {
+    if (unixTime != null) {
+        return getDateWithUnixTime(unixTime)
+    }
+    return null
 }
 
 fun getUnixTimeIsPassed(unixTime: Long): Boolean {

@@ -139,8 +139,8 @@ fun TitleEntryView(question: String, isRequired: Boolean, textColor: Color = Whi
 }
 
 @Composable
-fun EntryView(question: String, placeholder: String, isRequired: Boolean, setResponse: (String) -> Unit, textColor: Color = White) {
-    var text by remember { mutableStateOf("") }
+fun EntryView(question: String, placeholder: String, isRequired: Boolean, valueResponse: String="", setResponse: (String) -> Unit, textColor: Color = White) {
+    var text by remember { mutableStateOf(valueResponse) }
 
     Column(
         modifier = Modifier
@@ -179,8 +179,8 @@ fun EntryView(question: String, placeholder: String, isRequired: Boolean, setRes
 }
 
 @Composable
-fun BigEntryView(question: String, placeholder: String, isRequired: Boolean, setResponse: (String) -> Unit, textColor: Color = White) {
-    var text by remember { mutableStateOf("") }
+fun BigEntryView(question: String, placeholder: String, isRequired: Boolean, valueResponse: String = "", setResponse: (String) -> Unit, textColor: Color = White) {
+    var text by remember { mutableStateOf(valueResponse) }
 
     Column(
         modifier = Modifier
@@ -228,10 +228,10 @@ fun BigEntryView(question: String, placeholder: String, isRequired: Boolean, set
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SelectBoxView(question: String, isRequired: Boolean, setSelectedOption: (EnumPeriodicyTask) -> Unit, textColor: Color = White) {
+fun SelectBoxView(question: String, isRequired: Boolean, optionValue: EnumPeriodicyTask? = null, setSelectedOption: (EnumPeriodicyTask) -> Unit, textColor: Color = White) {
     val options = EnumPeriodicyTask.entries
     var expanded by remember { mutableStateOf(false) }
-    var selectedOption by remember { mutableStateOf(options[0].label) }
+    var selectedOption by remember { mutableStateOf(optionValue?.label ?: options[0].label) }
 
     Column(
         modifier = Modifier
@@ -292,7 +292,7 @@ fun SelectBoxView(question: String, isRequired: Boolean, setSelectedOption: (Enu
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SelectTimeView(setDateResponse: (Long) -> Unit, setHourResponse: (Int) -> Unit, setMinuteResponse: (Int) -> Unit, dateIsRequired: Boolean, timeIsRequired: Boolean) {
+fun SelectTimeView(valueDate: Long? = null, setDateResponse: (Long) -> Unit, valueHour: Int? = null, setHourResponse: (Int) -> Unit, valueMinute: Int? = null, setMinuteResponse: (Int) -> Unit, dateIsRequired: Boolean, timeIsRequired: Boolean) {
     var showDatePickerModal by remember { mutableStateOf(false) }
     var showTimePickerModal by remember { mutableStateOf(false) }
 
@@ -303,16 +303,16 @@ fun SelectTimeView(setDateResponse: (Long) -> Unit, setHourResponse: (Int) -> Un
     var textDateFormat by remember { mutableStateOf("Cliquez pour chosir")}
     var textTimeFormat by remember { mutableStateOf("Cliquez pour chosir")}
 
-    if (dateIsRequired) {
-        textDateFormat = stringResource(R.string.cliquer_pour_choisir)
+    textDateFormat = if (dateIsRequired) {
+        stringResource(R.string.cliquer_pour_choisir)
     } else {
-        textDateFormat = stringResource(R.string.vide)
+        stringResource(R.string.vide)
     }
 
-    if (timeIsRequired) {
-        textTimeFormat = stringResource(R.string.cliquer_pour_choisir)
+    textTimeFormat = if (timeIsRequired) {
+        stringResource(R.string.cliquer_pour_choisir)
     } else {
-        textTimeFormat = stringResource(R.string.vide)
+        stringResource(R.string.vide)
     }
 
     Row (
@@ -389,6 +389,7 @@ fun SelectTimeView(setDateResponse: (Long) -> Unit, setHourResponse: (Int) -> Un
 
         if (showDatePickerModal) {
             DatePickerModal(
+                dateValue = valueDate,
                 onDateSelected = { date ->
                     selectedDate = date
                     selectedDate?.let{ setDateResponse(it) }
@@ -401,6 +402,8 @@ fun SelectTimeView(setDateResponse: (Long) -> Unit, setHourResponse: (Int) -> Un
         }
         if (showTimePickerModal) {
             TimePickerModal(
+                valueHour = valueHour,
+                valueMinute = valueMinute,
                 onTimeSelected = fun (hour: Int, minute: Int) {
                     selectedHour = hour
                     selectedMinute = minute
@@ -418,9 +421,12 @@ fun SelectTimeView(setDateResponse: (Long) -> Unit, setHourResponse: (Int) -> Un
     }
 }
 
+/**
+ * dateValue est une date en milliseconde
+ */
 @Composable
-fun DatePickerModal(onDateSelected: (Long?) -> Unit, onDismiss: () -> Unit) {
-    val datePickerState = rememberDatePickerState()
+fun DatePickerModal(dateValue: Long? = null, onDateSelected: (Long?) -> Unit, onDismiss: () -> Unit) {
+    val datePickerState = rememberDatePickerState(dateValue)
 
     DatePickerDialog(
         onDismissRequest = onDismiss,
@@ -443,12 +449,12 @@ fun DatePickerModal(onDateSelected: (Long?) -> Unit, onDismiss: () -> Unit) {
 }
 
 @Composable
-fun TimePickerModal(onTimeSelected: (Int, Int) -> Unit, onDismiss: () -> Unit) {
+fun TimePickerModal(valueHour: Int? = null, valueMinute: Int? = null, onTimeSelected: (Int, Int) -> Unit, onDismiss: () -> Unit) {
     val currentTime = Calendar.getInstance()
 
     val timePickerState = rememberTimePickerState(
-        initialHour = currentTime.get(Calendar.HOUR_OF_DAY),
-        initialMinute = currentTime.get(Calendar.MINUTE),
+        initialHour = valueHour ?: currentTime.get(Calendar.HOUR_OF_DAY),
+        initialMinute = valueMinute ?: currentTime.get(Calendar.MINUTE),
         is24Hour = true,
     )
     AlertDialog(
@@ -557,7 +563,7 @@ fun SelectBoxViewPreview() {
 fun SelectTimeViewPreview() {
     NoteHaieTheme {
         SelectTimeView(
-            {}, {}, {}, dateIsRequired = false, timeIsRequired = true
+            setDateResponse = {}, setHourResponse = {}, setMinuteResponse = {}, dateIsRequired = false, timeIsRequired = true
         )
     }
 }
@@ -567,7 +573,7 @@ fun SelectTimeViewPreview() {
 fun DatePickerModalPreview() {
     NoteHaieTheme {
         DatePickerModal(
-            {}, {}
+            onDismiss = {}, onDateSelected = {}
         )
     }
 }
@@ -577,7 +583,7 @@ fun DatePickerModalPreview() {
 fun TimePickerModalPreview() {
     NoteHaieTheme {
         TimePickerModal(
-            fun (a: Int, b: Int) {}, {}
+            onTimeSelected = fun (_: Int, _: Int) {}, onDismiss = {}
         )
     }
 }

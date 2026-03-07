@@ -64,12 +64,16 @@ fun HomeScreen(viewModel: TaskViewModel, navController: NavHostController) {
         },
         navigateToNewTask = {
             navController.navigate("new-task")
+        },
+        navigateToUpDateTask = { id ->
+            if (id <= 0) navController.navigate("home")
+            navController.navigate("update-task/$id")
         }
     )
 }
 
 @Composable
-fun HomeScreenContent(tasks: List<Task>, onValidatedTask: (Task, Boolean) -> Unit, navigateToNewTask: () -> Unit) {
+fun HomeScreenContent(tasks: List<Task>, onValidatedTask: (Task, Boolean) -> Unit, navigateToNewTask: () -> Unit, navigateToUpDateTask: (Int) -> Unit) {
 
     var taskSelected by remember { mutableStateOf<Task?>(null) }
 
@@ -149,10 +153,13 @@ fun HomeScreenContent(tasks: List<Task>, onValidatedTask: (Task, Boolean) -> Uni
                     PanelTask(
                         task = task,
                         onDismiss = { taskSelected = null },
-                        onValidatedTask = onValidatedTask
+                        onValidatedTask = onValidatedTask,
+                        onClickUpdate = {
+                            taskSelected = null
+                            navigateToUpDateTask(task.id)
+                        }
                     )
                 }
-
             }
 
             FooterView()
@@ -167,7 +174,8 @@ fun HomeScreenPreview() {
         HomeScreenContent(
             tasks = ExempleTask.tasks,
             {_, _ -> },
-            { }
+            {},
+            {}
         )
     }
 }
