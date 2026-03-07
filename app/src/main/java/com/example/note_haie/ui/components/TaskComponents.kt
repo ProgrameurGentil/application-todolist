@@ -53,6 +53,7 @@ import com.example.note_haie.ui.theme.LightGreen
 import com.example.note_haie.ui.theme.LightNightBlue
 import com.example.note_haie.ui.theme.LightRed
 import com.example.note_haie.ui.theme.MainBackground
+import com.example.note_haie.ui.theme.NightBlue
 import com.example.note_haie.ui.theme.NoteHaieTheme
 import com.example.note_haie.ui.theme.Red
 import com.example.note_haie.ui.theme.White
@@ -73,12 +74,13 @@ fun TaskView(task: Task, onValidatedTask: (Task, Boolean) -> Unit) {
     }
 
     var checked by remember(task) { task.isValidated }
+    val bgColor = if (checked) NightBlue else LightNightBlue
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(LightNightBlue)
+            .background(bgColor)
             .padding(5.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

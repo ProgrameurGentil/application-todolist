@@ -90,7 +90,7 @@ fun AppNavigation(viewModel: TaskViewModel) {
 @Composable
 fun HomeScreenPreview() {
     NoteHaieTheme {
-        HomeScreenContent(ExempleTask.tasks, {_, _ ->  }, {}, {})
+        HomeScreenContent(ExempleTask.tasks, ExempleTask.tasks, {_, _ ->  }, {}, {})
     }
 }
 

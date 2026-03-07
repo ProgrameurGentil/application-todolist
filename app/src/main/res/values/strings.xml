@@ -34,4 +34,5 @@
     <string name="mention_obligatoire">Champ de saisie obligatoire</string>
     <string name="vide" />
     <string name="page_modifier_tache">Modifier une tache</string>
+    <string name="termine">Termine</string>
 </resources>

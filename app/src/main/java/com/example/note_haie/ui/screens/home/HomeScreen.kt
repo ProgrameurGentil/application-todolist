@@ -15,8 +15,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -52,10 +52,13 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(viewModel: TaskViewModel, navController: NavHostController) {
-    val tasks by viewModel.fullTasks().collectAsState(initial = emptyList())
+    val tasksInProgress by viewModel.notValidatedTask().collectAsState(initial = emptyList())
+    val tasksFinished by viewModel.validatedTask().collectAsState(initial = emptyList())
+
     val scope = rememberCoroutineScope()
     HomeScreenContent(
-        tasks = tasks,
+        tasksInProgress = tasksInProgress,
+        tasksFinished = tasksFinished,
         onValidatedTask = { task, newValue ->
             scope.launch {
                 task.isValidated.value = newValue
@@ -73,11 +76,12 @@ fun HomeScreen(viewModel: TaskViewModel, navController: NavHostController) {
 }
 
 @Composable
-fun HomeScreenContent(tasks: List<Task>, onValidatedTask: (Task, Boolean) -> Unit, navigateToNewTask: () -> Unit, navigateToUpDateTask: (Int) -> Unit) {
+fun HomeScreenContent(tasksInProgress: List<Task>, tasksFinished: List<Task>, onValidatedTask: (Task, Boolean) -> Unit, navigateToNewTask: () -> Unit, navigateToUpDateTask: (Int) -> Unit) {
 
     var taskSelected by remember { mutableStateOf<Task?>(null) }
 
     Scaffold(
+        modifier = Modifier.fillMaxSize(),
         floatingActionButton = {
             FloatingButton(
                 onClick = navigateToNewTask
@@ -96,18 +100,20 @@ fun HomeScreenContent(tasks: List<Task>, onValidatedTask: (Task, Boolean) -> Uni
 
             Column(
                 modifier = Modifier
-                    .weight(1f)
+                    .weight(1f) // Prend tout l'espace disponible entre Header et Footer
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Column(
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    var isRetract by remember { mutableStateOf(false) }
-                    val arrowRetracted = if (isRetract) R.drawable.fleche_haut else R.drawable.fleche_bas
+                    var isRetractInProgress by remember { mutableStateOf(false) }
+                    val arrowRetractedInProgress = if (isRetractInProgress) R.drawable.fleche_haut else R.drawable.fleche_bas
+
                     TextButton(
-                        onClick = { isRetract = !isRetract }
+                        onClick = { isRetractInProgress = !isRetractInProgress }
                     ) {
                         Text(
                             modifier = Modifier.padding(end = 5.dp),
@@ -117,7 +123,7 @@ fun HomeScreenContent(tasks: List<Task>, onValidatedTask: (Task, Boolean) -> Uni
                         )
 
                         Image(
-                            painter = painterResource(arrowRetracted),
+                            painter = painterResource(arrowRetractedInProgress),
                             contentDescription = stringResource(R.string.description_icon_fleche),
                             modifier = Modifier
                                 .size(25.dp)
@@ -129,12 +135,61 @@ fun HomeScreenContent(tasks: List<Task>, onValidatedTask: (Task, Boolean) -> Uni
                     Spacer(modifier = Modifier.height(14.dp))
 
                     AnimatedVisibility(
-                        visible = !isRetract,
+                        visible = !isRetractInProgress,
                         enter = expandVertically() + fadeIn(),
                         exit = shrinkVertically() + fadeOut()
                     ) {
-                        LazyColumn {
-                            items(tasks) { task -> // On passe directement la liste
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            tasksInProgress.forEach { task ->
+                                TaskButton(
+                                    task = task,
+                                    onClick = {
+                                        taskSelected = task
+                                    },
+                                    onValidatedTask = onValidatedTask
+                                )
+                                Spacer(modifier = Modifier.height(10.dp))
+                            }
+                        }
+                    }
+                }
+
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+
+                    var isRetractFinish by remember { mutableStateOf(false) }
+                    val arrowRetractedFinish = if (isRetractFinish) R.drawable.fleche_haut else R.drawable.fleche_bas
+
+                    TextButton(
+                        onClick = { isRetractFinish = !isRetractFinish }
+                    ) {
+                        Text(
+                            modifier = Modifier.padding(end = 5.dp),
+                            text = stringResource(R.string.termine),
+                            style = MaterialTheme.typography.titleLarge,
+                            color = LightWhite
+                        )
+
+                        Image(
+                            painter = painterResource(arrowRetractedFinish),
+                            contentDescription = stringResource(R.string.description_icon_fleche),
+                            modifier = Modifier
+                                .size(25.dp)
+                                .padding(top = 4.dp),
+                            alpha = 0.54F
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    AnimatedVisibility(
+                        visible = !isRetractFinish,
+                        enter = expandVertically() + fadeIn(),
+                        exit = shrinkVertically() + fadeOut()
+                    ) {
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            tasksFinished.forEach { task ->
                                 TaskButton(
                                     task = task,
                                     onClick = {
@@ -172,7 +227,8 @@ fun HomeScreenContent(tasks: List<Task>, onValidatedTask: (Task, Boolean) -> Uni
 fun HomeScreenPreview() {
     NoteHaieTheme {
         HomeScreenContent(
-            tasks = ExempleTask.tasks,
+            tasksInProgress = ExempleTask.tasks,
+            tasksFinished = ExempleTask.tasks.subList(0, 2),
             {_, _ -> },
             {},
             {}

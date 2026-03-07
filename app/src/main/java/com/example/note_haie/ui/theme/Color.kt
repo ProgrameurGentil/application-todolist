@@ -16,6 +16,8 @@ val White = Color(0xFFFFFFFF)
 val LightWhite = Color(0x8A757575)
 val LightNightBlue = Color(0xFF4A6D9F)
 
+val NightBlue = Color(0xFF22508D)
+
 val LightBlue = Color(0xFF4C8CDA)
 val Green = Color(0xFF00941B)
 
