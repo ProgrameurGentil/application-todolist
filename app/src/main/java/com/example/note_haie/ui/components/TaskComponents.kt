@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -45,6 +46,7 @@ import com.example.note_haie.model.EnumStateTimeTask
 import com.example.note_haie.model.ExempleTask
 import com.example.note_haie.model.Task
 import com.example.note_haie.model.label
+import com.example.note_haie.model.playSong
 import com.example.note_haie.ui.theme.Black
 import com.example.note_haie.ui.theme.DarkBlue
 import com.example.note_haie.ui.theme.Green
@@ -59,13 +61,20 @@ import com.example.note_haie.ui.theme.Red
 import com.example.note_haie.ui.theme.White
 import com.example.note_haie.utils.decomposeUnixTime
 import com.example.note_haie.utils.getDateWithUnixTime
+import com.example.note_haie.utils.unixToUtc
 
 @Composable
 fun TaskView(task: Task, onValidatedTask: (Task, Boolean) -> Unit) {
-    val dateTime = if (task.date != null) {decomposeUnixTime(task.date)} else {decomposeUnixTime(0)}
+    val context = LocalContext.current
+
+    val labelNoSpecificDate = stringResource(R.string.aucune_date_def)
+
     val stateTime = task.stateTime
     val name = task.name
-    val date = if (task.periodicy != EnumPeriodicyTask.SINGLE) {"le ${dateTime.day} ${dateTime.month} ${dateTime.year} à ${dateTime.hour}h${dateTime.minute}"} else "Aucune date définit"
+    val date = when {
+        task.date != null -> unixToUtc(task.date, time = true)
+        else -> labelNoSpecificDate
+    }
 
     val bgTimeStateIndicator = when (stateTime) {
         EnumStateTimeTask.LATE -> Red
@@ -95,9 +104,12 @@ fun TaskView(task: Task, onValidatedTask: (Task, Boolean) -> Unit) {
             Checkbox(
                 checked = checked,
                 onCheckedChange = {
-                        checked = it
-                        onValidatedTask(task, it)
-                    },
+                    checked = it
+                    onValidatedTask(task, it)
+                    if (task.isValidated.value) {
+                        playSong(context)
+                    }
+                },
                 modifier = Modifier.scale(1.5f)
             )
         }
@@ -167,6 +179,7 @@ fun TaskButton(task: Task, onClick: () -> Unit, onValidatedTask: (Task, Boolean)
 
 @Composable
 fun PanelTask(task: Task, onValidatedTask: (Task, Boolean) -> Unit, onDismiss: () -> Unit, onClickUpdate: () -> Unit) {
+    val context = LocalContext.current
 
     var checked by remember(task) { task.isValidated }
 
@@ -203,6 +216,9 @@ fun PanelTask(task: Task, onValidatedTask: (Task, Boolean) -> Unit, onDismiss: (
                             onCheckedChange = {
                                     checked = it
                                     onValidatedTask(task, it)
+                                    if (task.isValidated.value) {
+                                        playSong(context)
+                                    }
                                 },
                             modifier = Modifier.scale(1.5f)
                         )
@@ -295,23 +311,29 @@ fun FormTask(
     var dateIsRequired by remember { mutableStateOf(false) }
     var timeIsRequired by remember { mutableStateOf(false) }
 
+    var periodicyIsSingle by remember { mutableStateOf(true) }
+
     val changePeriodicy = { newPeriodicy: EnumPeriodicyTask ->
         when(newPeriodicy) {
             EnumPeriodicyTask.DAILY -> {
+                periodicyIsSingle = false
                 dateIsRequired = false
                 timeIsRequired = true
             }
 
             EnumPeriodicyTask.WEEKLY -> {
+                periodicyIsSingle = false
                 dateIsRequired = true
                 timeIsRequired = true
             }
 
             EnumPeriodicyTask.MONTHLY -> {
+                periodicyIsSingle = false
                 dateIsRequired = true
                 timeIsRequired = true
             }
             else -> {
+                periodicyIsSingle = true
                 dateIsRequired = false
                 timeIsRequired = false
             }
@@ -381,7 +403,7 @@ fun FormTask(
                 }
             )
 
-            if (dateIsRequired || timeIsRequired) {
+            if (dateIsRequired || timeIsRequired || periodicyIsSingle) {
                 SelectTimeView(
                     valueDate = dateResponse,
                     setDateResponse = {
@@ -399,7 +421,8 @@ fun FormTask(
                         minuteResponse = it
                     },
                     dateIsRequired = dateIsRequired,
-                    timeIsRequired = timeIsRequired
+                    timeIsRequired = timeIsRequired,
+                    show = periodicyIsSingle
                 )
             } else {
                 Spacer(modifier = Modifier.height(10.dp))
@@ -451,7 +474,8 @@ fun FormTaskPreview() {
             setDateResponse = {},
             setHourResponse = {},
             setMinuteResponse = {},
-            buttonsContent = {}
+            buttonsContent = {},
+
         )
     }
 }
