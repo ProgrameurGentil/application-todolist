@@ -1,5 +1,10 @@
 package com.example.note_haie.ui.screens.home
 
+import android.Manifest
+import android.content.Context
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -22,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,6 +36,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -76,9 +83,21 @@ fun HomeScreen(viewModel: TaskViewModel, navController: NavHostController) {
 }
 
 @Composable
-fun HomeScreenContent(tasksInProgress: List<Task>, tasksFinished: List<Task>, onValidatedTask: (Task, Boolean) -> Unit, navigateToNewTask: () -> Unit, navigateToUpDateTask: (Int) -> Unit) {
+fun HomeScreenContent(
+    tasksInProgress: List<Task>,
+    tasksFinished: List<Task>,
+    onValidatedTask: (Task, Boolean) -> Unit,
+    navigateToNewTask: () -> Unit,
+    navigateToUpDateTask: (Int) -> Unit
+) {
 
     var taskSelected by remember { mutableStateOf<Task?>(null) }
+    var showPermission by remember { mutableStateOf(true) }
+
+
+    if (showPermission) {
+        PermissionScreen(onResult = {showPermission = false})
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -218,6 +237,21 @@ fun HomeScreenContent(tasksInProgress: List<Task>, tasksFinished: List<Task>, on
             }
 
             FooterView()
+        }
+    }
+}
+
+@Composable
+fun PermissionScreen(onResult: (Boolean) -> Unit) {
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { onResult(it) }
+    )
+
+    LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            launcher.launch(Manifest.permission.SCHEDULE_EXACT_ALARM)
         }
     }
 }

@@ -16,6 +16,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -26,6 +27,7 @@ import com.example.note_haie.model.EnumPeriodicyTask
 import com.example.note_haie.model.EnumStateTask
 import com.example.note_haie.model.EnumStateTimeTask
 import com.example.note_haie.model.Task
+import com.example.note_haie.model.addAlarm
 import com.example.note_haie.ui.components.ButtonView
 import com.example.note_haie.ui.components.ErrorModal
 import com.example.note_haie.ui.components.FooterView
@@ -36,17 +38,21 @@ import com.example.note_haie.ui.theme.LightGreen
 import com.example.note_haie.ui.theme.LightRed
 import com.example.note_haie.ui.theme.MainBackground
 import com.example.note_haie.ui.theme.NoteHaieTheme
+import com.example.note_haie.utils.getUnixTimeWithDecomposedTime
 import com.example.note_haie.viewmodels.TaskViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun NewTaskScreen(viewModel: TaskViewModel, navController: NavHostController) {
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+
     NewTaskScreenContent(
         addTask = {task ->
             scope.launch {
                 viewModel.insertTask(task.toEntity())
             }
+            addAlarm(context = context, task = task)
         },
         navigateToBack = {
             navController.popBackStack()
@@ -69,6 +75,9 @@ fun NewTaskScreenContent(addTask: (Task) -> Unit, navigateToBack: () -> Boolean,
     var showModalError by remember { mutableStateOf(false) }
     var titleModalError by remember { mutableStateOf("Erreur") }
     var textModalError by remember { mutableStateOf("") }
+
+    val errorEmptyField = stringResource(R.string.champ_vide)
+    val errorEmptyFieldName = stringResource(R.string.champ_vide_nom_tache)
 
     Column(
         modifier = Modifier
@@ -124,17 +133,17 @@ fun NewTaskScreenContent(addTask: (Task) -> Unit, navigateToBack: () -> Boolean,
                             // TODO("faire dans les prochaines versions toutes les vérifications")
 
                             val title = titleResponse
-//                                val date = dateResponse
+                            val date = getUnixTimeWithDecomposedTime(dateResponse, hourResponse, minuteResponse)
 
                             if (title == null) {
-                                titleModalError = "Champ vide"
-                                textModalError = "Vous avez oubliez de remplir le champ du titre de la tache"
+                                titleModalError = errorEmptyField
+                                textModalError = errorEmptyFieldName
                                 showModalError = true
                             } else {
                                 val task = Task(
                                     id = 0,
                                     name = title,
-                                    date = null,
+                                    date = if (date == 0L) null else date, //TODO ne correspond qu'a un temps unique
                                     description = descriptionResponse ?: "",
                                     isValidated = mutableStateOf(false),
                                     stateTime = EnumStateTimeTask.NONE,
