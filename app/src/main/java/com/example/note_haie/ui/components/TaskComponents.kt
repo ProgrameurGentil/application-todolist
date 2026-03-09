@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Checkbox
@@ -178,7 +177,7 @@ fun TaskButton(task: Task, onClick: () -> Unit, onValidatedTask: (Task, Boolean)
 }
 
 @Composable
-fun PanelTask(task: Task, onValidatedTask: (Task, Boolean) -> Unit, onDismiss: () -> Unit, onClickUpdate: () -> Unit) {
+fun PanelTask(task: Task, onValidatedTask: (Task, Boolean) -> Unit, onDismiss: () -> Unit, onClickUpdate: () -> Unit, onClickDelete: () -> Unit) {
     val context = LocalContext.current
 
     var checked by remember(task) { task.isValidated }
@@ -263,7 +262,7 @@ fun PanelTask(task: Task, onValidatedTask: (Task, Boolean) -> Unit, onDismiss: (
                 horizontalArrangement = Arrangement.End
             ) {
                 Button(
-                    onClick = { },
+                    onClick = onClickDelete,
                     colors = ButtonColors(LightRed, Black, LightRed, LightRed)
                 ) {
                     Text(
@@ -435,27 +434,6 @@ fun FormTask(
     }
 }
 
-@Composable
-fun ErrorModal(title: String, text: String, onDismiss: () -> Unit) {
-    AlertDialog(
-        title = {
-            Text(text = title)
-        },
-        text = {
-            Text(text = text)
-        },
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(
-                onClick = {onDismiss()}
-            ) {
-                Text(stringResource(R.string.ok))
-            }
-        },
-        dismissButton = {}
-    )
-}
-
 /* Previews */
 
 @Preview(showBackground = false)
@@ -487,18 +465,6 @@ fun TaskViewPreview() {
         TaskView(
             ExempleTask.tasks[0],
             {_, _ ->}
-        )
-    }
-}
-
-@Preview(showBackground = false)
-@Composable
-fun ErrorModalPreview() {
-    NoteHaieTheme {
-        ErrorModal(
-            "Titre de l'erreur",
-            "Je suis une erreur !!",
-            onDismiss = {}
         )
     }
 }

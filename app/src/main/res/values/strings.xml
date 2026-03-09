@@ -44,4 +44,6 @@
     <string name="aucune_date_def">Aucune date définit</string>
     <string name="nom_channel_notif_retard_tache">Rappels de tâches</string>
     <string name="desc_channel_notif_retard_tache">Canal pour les rappels de vos tâches quotidiennes</string>
+    <string name="titre_suppression_tache">Suppression de tache</string>
+    <string name="message_confirmation_suppr_tache">Êtes-vous sûr de vouloir supprimer la tache \' %1$s \' ? \n\nCette action est définitive.</string>
 </resources>

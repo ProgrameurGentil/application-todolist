@@ -46,6 +46,7 @@ import com.example.note_haie.R
 import com.example.note_haie.database.task.toEntity
 import com.example.note_haie.model.ExempleTask
 import com.example.note_haie.model.Task
+import com.example.note_haie.ui.components.ConfirmModal
 import com.example.note_haie.ui.components.FloatingButton
 import com.example.note_haie.ui.components.FooterView
 import com.example.note_haie.ui.components.HeaderView
@@ -78,6 +79,11 @@ fun HomeScreen(viewModel: TaskViewModel, navController: NavHostController) {
         navigateToUpDateTask = { id ->
             if (id <= 0) navController.navigate("home")
             navController.navigate("update-task/$id")
+        },
+        deleteTask = { id ->
+            scope.launch {
+                viewModel.deleteTask(id)
+            }
         }
     )
 }
@@ -88,12 +94,13 @@ fun HomeScreenContent(
     tasksFinished: List<Task>,
     onValidatedTask: (Task, Boolean) -> Unit,
     navigateToNewTask: () -> Unit,
-    navigateToUpDateTask: (Int) -> Unit
+    navigateToUpDateTask: (Int) -> Unit,
+    deleteTask: (Int) -> Unit
 ) {
 
     var taskSelected by remember { mutableStateOf<Task?>(null) }
     var showPermission by remember { mutableStateOf(true) }
-
+    var showConfirmModal by remember { mutableStateOf(false) }
 
     if (showPermission) {
         PermissionScreen(onResult = {showPermission = false})
@@ -231,9 +238,37 @@ fun HomeScreenContent(
                         onClickUpdate = {
                             taskSelected = null
                             navigateToUpDateTask(task.id)
+                        },
+                        onClickDelete = {
+                            showConfirmModal = true
                         }
                     )
                 }
+
+                if (showConfirmModal) {
+                    val currentTask = taskSelected
+                    if (currentTask != null) {
+                        val idTaskSelected = currentTask.id
+                        val nameTaskSelected = currentTask.name
+                        stringResource(R.string.message_confirmation_suppr_tache)
+                        ConfirmModal(
+                            title = stringResource(R.string.titre_suppression_tache),
+                            text = stringResource(R.string.message_confirmation_suppr_tache, nameTaskSelected),
+                            onDismiss = {
+                                showConfirmModal = false
+                            },
+                            onDismissTrue = {
+                                taskSelected = null
+                                deleteTask(idTaskSelected)
+                            },
+                            onDismissFalse = {}
+                        )
+                    } else {
+                        showConfirmModal = false
+                    }
+
+                }
+
             }
 
             FooterView()
@@ -264,6 +299,7 @@ fun HomeScreenPreview() {
             tasksInProgress = ExempleTask.tasks,
             tasksFinished = ExempleTask.tasks.subList(0, 2),
             {_, _ -> },
+            {},
             {},
             {}
         )
