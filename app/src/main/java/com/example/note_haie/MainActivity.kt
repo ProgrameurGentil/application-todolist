@@ -16,6 +16,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.note_haie.database.AppDatabase
 import com.example.note_haie.model.ExempleTask
+import com.example.note_haie.model.createNotificationChannel
 import com.example.note_haie.ui.screens.home.HomeScreen
 import com.example.note_haie.ui.screens.home.HomeScreenContent
 import com.example.note_haie.ui.screens.newtask.NewTaskScreen
@@ -32,6 +33,8 @@ class MainActivity : ComponentActivity() {
 
         val database = AppDatabase.getDatabase(this)
         val dao = database.taskDao()
+
+        createNotificationChannel(this)
 
         enableEdgeToEdge()
         setContent {
@@ -90,7 +93,7 @@ fun AppNavigation(viewModel: TaskViewModel) {
 @Composable
 fun HomeScreenPreview() {
     NoteHaieTheme {
-        HomeScreenContent(ExempleTask.tasks, {_, _ ->  }, {}, {})
+        HomeScreenContent(ExempleTask.tasks, ExempleTask.tasks, {_, _ ->  }, {}, {})
     }
 }
 

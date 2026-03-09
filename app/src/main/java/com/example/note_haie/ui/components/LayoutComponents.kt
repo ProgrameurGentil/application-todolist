@@ -1,5 +1,6 @@
 package com.example.note_haie.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -292,7 +293,20 @@ fun SelectBoxView(question: String, isRequired: Boolean, optionValue: EnumPeriod
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SelectTimeView(valueDate: Long? = null, setDateResponse: (Long) -> Unit, valueHour: Int? = null, setHourResponse: (Int) -> Unit, valueMinute: Int? = null, setMinuteResponse: (Int) -> Unit, dateIsRequired: Boolean, timeIsRequired: Boolean) {
+fun SelectTimeView(
+    valueDate: Long? = null,
+    setDateResponse: (Long) -> Unit,
+    valueHour: Int? = null,
+    setHourResponse: (Int) -> Unit,
+    valueMinute: Int? = null,
+    setMinuteResponse: (Int) -> Unit,
+    dateIsRequired: Boolean,
+    timeIsRequired: Boolean,
+    show: Boolean = false
+) {
+    val labelChoice = stringResource(R.string.cliquer_pour_choisir)
+    val labelEmpty = stringResource(R.string.vide)
+
     var showDatePickerModal by remember { mutableStateOf(false) }
     var showTimePickerModal by remember { mutableStateOf(false) }
 
@@ -300,19 +314,21 @@ fun SelectTimeView(valueDate: Long? = null, setDateResponse: (Long) -> Unit, val
     var selectedHour by remember { mutableStateOf<Int?>(null) }
     var selectedMinute by remember { mutableStateOf<Int?>(null) }
 
-    var textDateFormat by remember { mutableStateOf("Cliquez pour chosir")}
-    var textTimeFormat by remember { mutableStateOf("Cliquez pour chosir")}
+//    var textDateFormat by remember { mutableStateOf(stringResource(R.string.cliquer_pour_choisir))}
+    //var textTimeFormat by remember { mutableStateOf("Cliquez pour chosir")}
 
-    textDateFormat = if (dateIsRequired) {
-        stringResource(R.string.cliquer_pour_choisir)
-    } else {
-        stringResource(R.string.vide)
+    val textDateFormat = when {
+        valueDate != null -> unixToUtc(valueDate)
+        selectedDate != null -> selectedDate?.let { unixToUtc(it) } ?: labelChoice
+        dateIsRequired || show -> labelChoice
+        else -> labelEmpty
     }
 
-    textTimeFormat = if (timeIsRequired) {
-        stringResource(R.string.cliquer_pour_choisir)
-    } else {
-        stringResource(R.string.vide)
+    val textTimeFormat = when {
+        valueHour !=null || valueMinute != null -> "${valueHour ?: 0}h${valueMinute ?: 0}"
+        selectedHour != null && selectedMinute != null -> "${selectedHour}h${selectedMinute}"
+        dateIsRequired || show -> labelChoice
+        else -> labelEmpty
     }
 
     Row (
@@ -340,7 +356,7 @@ fun SelectTimeView(valueDate: Long? = null, setDateResponse: (Long) -> Unit, val
                     .clickable(
                         enabled = true,
                         onClick = {
-                            if (dateIsRequired)
+                            if (dateIsRequired || show)
                                 showDatePickerModal = true
                         }
                     ),
@@ -372,7 +388,7 @@ fun SelectTimeView(valueDate: Long? = null, setDateResponse: (Long) -> Unit, val
                     .clickable(
                         enabled = true,
                         onClick = {
-                            if (timeIsRequired)
+                            if (timeIsRequired || show)
                                 showTimePickerModal = true
                         }
                     ),
@@ -382,17 +398,14 @@ fun SelectTimeView(valueDate: Long? = null, setDateResponse: (Long) -> Unit, val
             }
         }
 
-        selectedDate?.let { textDateFormat = unixToUtc(it) }
-        if (selectedHour != null && selectedMinute != null) {
-            textTimeFormat = "${selectedHour}h${selectedMinute}"
-        }
-
         if (showDatePickerModal) {
             DatePickerModal(
                 dateValue = valueDate,
                 onDateSelected = { date ->
-                    selectedDate = date
-                    selectedDate?.let{ setDateResponse(it) }
+                    date?.let {
+                        selectedDate = it
+                        setDateResponse(it)
+                    }
                     showDatePickerModal = false
                 },
                 onDismiss = {

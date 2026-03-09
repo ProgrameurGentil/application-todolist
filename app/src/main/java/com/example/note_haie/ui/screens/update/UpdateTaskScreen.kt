@@ -17,6 +17,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -26,6 +27,7 @@ import com.example.note_haie.database.task.toEntity
 import com.example.note_haie.model.EnumPeriodicyTask
 import com.example.note_haie.model.ExempleTask
 import com.example.note_haie.model.Task
+import com.example.note_haie.model.addAlarm
 import com.example.note_haie.ui.components.ButtonView
 import com.example.note_haie.ui.components.ErrorModal
 import com.example.note_haie.ui.components.FooterView
@@ -38,14 +40,17 @@ import com.example.note_haie.ui.theme.MainBackground
 import com.example.note_haie.ui.theme.NoteHaieTheme
 import com.example.note_haie.utils.decomposeUnixTime
 import com.example.note_haie.utils.getDateWithUnixTime
+import com.example.note_haie.utils.getUnixTimeWithDecomposedTime
 import com.example.note_haie.viewmodels.TaskViewModel
 import kotlinx.coroutines.launch
+import kotlin.math.min
 
 @Composable
 fun UpdateTaskScreen(idTask: Int, viewModel: TaskViewModel, navController: NavHostController) {
     val taskFlow = remember(idTask) { viewModel.getTaskWithId(idTask) }
     val task by taskFlow.collectAsState(null)
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     if (idTask <= 0) navController.navigate("home") // si la valeur par defaut est utilisé
     //navController.navigate("home") // DEBUG
@@ -61,8 +66,9 @@ fun UpdateTaskScreen(idTask: Int, viewModel: TaskViewModel, navController: NavHo
             },
             updateTask = {task ->
                 scope.launch {
-                    val r = viewModel.updateTask(task.toEntity())
+                    viewModel.updateTask(task.toEntity()) // retourne l'id
                 }
+                addAlarm(context, task = task)
             }
         )
     }
@@ -79,10 +85,13 @@ fun UpdateTaskScreenContent(task: Task, navigateToBack: () -> Boolean, navigateT
     var minuteResponse by remember { mutableStateOf<Int?>(date?.minute) }
     var dateResponse  by remember { mutableStateOf<Long?>(getDateWithUnixTime(task.date)) }
 
-    val scope = rememberCoroutineScope()
     var showModalError by remember { mutableStateOf(false) }
     var titleModalError by remember { mutableStateOf("Erreur") }
     var textModalError by remember { mutableStateOf("") }
+
+    val errorEmptyField = stringResource(R.string.champ_vide)
+    val errorEmptyFieldName = stringResource(R.string.champ_vide_nom_tache)
+    
     Column(
         modifier = Modifier
             .fillMaxSize(),
@@ -138,17 +147,17 @@ fun UpdateTaskScreenContent(task: Task, navigateToBack: () -> Boolean, navigateT
                             // TODO("faire dans les prochaines versions toutes les vérifications")
 
                             val title = titleResponse
-//                                val date = dateResponse
+                            val date = getUnixTimeWithDecomposedTime(dateResponse, hourResponse, minuteResponse)
 
-                            if (title == null) {
-                                titleModalError = "Champ vide"
-                                textModalError = "Vous avez oubliez de remplir le champ du titre de la tache"
+                            if (title.isNullOrBlank()) {
+                                titleModalError = errorEmptyField
+                                textModalError = errorEmptyFieldName
                                 showModalError = true
                             } else {
                                 val newTask = Task(
                                     id = task.id,
                                     name = titleResponse ?: task.name,
-                                    date = null, //TODO
+                                    date = if (date == 0L) null else date, //TODO ne correspond qu'a un temps unique
                                     description = descriptionResponse ?: task.description,
                                     isValidated = task.isValidated,
                                     stateTime = task.stateTime,

@@ -34,4 +34,14 @@
     <string name="mention_obligatoire">Champ de saisie obligatoire</string>
     <string name="vide" />
     <string name="page_modifier_tache">Modifier une tache</string>
+    <string name="termine">Termine</string>
+    <string name="notification_tache_retard_titre">Vous avez une tache en retard !</string>
+    <string name="notification_tache_retard_message">La tache \' %1$s \' vient de passer en retard.</string>
+    <string name="notification_tache_retard_long_message">Description de la tache : %1$s</string>
+    <string name="tache_sans_nom">Tache Sans Nom</string>
+    <string name="erreur_champ_vide">Champ vide</string>
+    <string name="erreur_champ_vide_nom_tache">Vous avez oubliez de remplir le champ du titre de la tache</string>
+    <string name="aucune_date_def">Aucune date définit</string>
+    <string name="nom_channel_notif_retard_tache">Rappels de tâches</string>
+    <string name="desc_channel_notif_retard_tache">Canal pour les rappels de vos tâches quotidiennes</string>
 </resources>
