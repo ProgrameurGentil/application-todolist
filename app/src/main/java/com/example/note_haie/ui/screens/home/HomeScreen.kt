@@ -161,7 +161,7 @@ fun HomeScreenContent(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            HeaderView()
+            HeaderView(false)
 
             Column(
                 modifier = Modifier
