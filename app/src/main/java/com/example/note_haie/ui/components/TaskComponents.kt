@@ -451,7 +451,7 @@ fun FormTask(
                     question = stringResource(R.string.priorite),
                     isRequired = true,
                     textColor = White,
-                    optionValue = null,
+                    optionValue = task?.priority,
                     setSelectedOption = {
                         setPriorityResponse(it)
                     }
