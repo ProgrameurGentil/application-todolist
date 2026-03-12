@@ -27,6 +27,7 @@ fun TaskEntity.toDomain(): Task {
         id = this.id,
         name = this.title,
         date = this.date,
+        dateValidated = this.dateValidated,
         description = this.description,
         isValidated = mutableStateOf(this.isValidated),
         stateTime = stateTime,
@@ -46,6 +47,7 @@ fun Task.toEntity(): TaskEntity {
         description = this.description,
         periodicy = this.periodicy,
         date = this.date,
+        dateValidated = dateValidated,
         file = this.file,
         isValidated = this.isValidated.value
     )

@@ -6,6 +6,8 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverter
 import androidx.room.TypeConverters
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.note_haie.database.task.TaskDao
 import com.example.note_haie.database.task.TaskEntity
 import com.example.note_haie.model.EnumPeriodicyTask
@@ -23,7 +25,14 @@ class Converters {
     }
 }
 
-@Database(entities = [TaskEntity::class], version = 1)
+
+val MIGRATION_1_2 = object : Migration(1, 2) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE tasks ADD COLUMN date_validated INTEGER DEFAULT NULL")
+    }
+}
+
+@Database(entities = [TaskEntity::class], version = 2)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
 
@@ -39,7 +48,9 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "task_database"
-                ).build()
+                )
+                    .addMigrations(MIGRATION_1_2) // 2. On utilise la migration au lieu de tout supprimer
+                    .build()
                 INSTANCE = instance
                 instance
             }

@@ -172,3 +172,17 @@ fun addTimeInDate(date: Long, year: Int = 0, month: Int = 0, week:Int = 0, day: 
             hour * TimeInMs.HOUR.value +
             minute * TimeInMs.MINUTE.value
 }
+
+/**
+ * Donne la date actuel au format Unix millisecond avec l'UTC du systeme
+ * @return Long - La date actuel au format Unix millisecond
+ */
+fun actualDate(): Long {
+    return LocalDate
+        .now()
+        .atStartOfDay(
+            ZoneId.systemDefault()
+        )
+        .toInstant()
+        .toEpochMilli()
+}

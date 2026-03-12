@@ -12,6 +12,7 @@ data class TaskEntity(
     @ColumnInfo(name = "description") val description: String,
     @ColumnInfo(name = "periodicy") val periodicy: EnumPeriodicyTask,
     @ColumnInfo(name = "date") val date: Long?,
+    @ColumnInfo(name = "date_validated") val dateValidated: Long?,
     @ColumnInfo(name = "file") val file: String?,
     @ColumnInfo(name = "is_validated") val isValidated: Boolean
 )

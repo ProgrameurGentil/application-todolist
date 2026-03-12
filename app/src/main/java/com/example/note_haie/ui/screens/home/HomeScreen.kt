@@ -42,8 +42,10 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.note_haie.R
 import com.example.note_haie.database.task.toEntity
+import com.example.note_haie.model.EnumStateTask
 import com.example.note_haie.model.ExempleTask
 import com.example.note_haie.model.Task
+import com.example.note_haie.model.copyTask
 import com.example.note_haie.model.updateDateWithPeriodicy
 import com.example.note_haie.ui.components.ConfirmModal
 import com.example.note_haie.ui.components.FloatingButton
@@ -54,6 +56,7 @@ import com.example.note_haie.ui.components.TaskButton
 import com.example.note_haie.ui.theme.LightWhite
 import com.example.note_haie.ui.theme.MainBackground
 import com.example.note_haie.ui.theme.NoteHaieTheme
+import com.example.note_haie.utils.actualDate
 import com.example.note_haie.viewmodels.TaskViewModel
 import kotlinx.coroutines.launch
 
@@ -63,21 +66,40 @@ fun HomeScreen(viewModel: TaskViewModel, navController: NavHostController) {
     val tasksFinished by viewModel.validatedTask().collectAsState(initial = emptyList())
 
     val scope = rememberCoroutineScope()
+
+    LaunchedEffect(tasksFinished) {
+        tasksFinished.let {
+            it.forEach { task ->
+                task.date?.let {date -> // si une date est definit
+                    val newDate = updateDateWithPeriodicy(task.periodicy, task.date, task.dateValidated)
+
+                    if (date != newDate) { // si la date est differente alors cela signifi qu'on est un autre jour
+                        scope.launch {
+                            viewModel.updateTask(
+                                copyTask(
+                                    task = task,
+                                    dateValidated = null,
+                                    date = newDate,
+                                    isValidated = mutableStateOf(false),
+                                    state = EnumStateTask.NOT_REALISED
+                                ).toEntity()
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     HomeScreenContent(
         tasksInProgress = tasksInProgress,
         tasksFinished = tasksFinished,
         onValidatedTask = { task, newValue ->
             scope.launch {
-                val newTask = Task(
-                    id = task.id,
-                    name = task.name,
-                    date = if (task.date == null) null else updateDateWithPeriodicy(task.periodicy, task.date),
-                    description = task.description,
+                val newTask = copyTask(
+                    task = task,
                     isValidated = mutableStateOf(newValue),
-                    stateTime = task.stateTime,
-                    state = task.state,
-                    periodicy = task.periodicy,
-                    file = task.file
+                    dateValidated = if (newValue) actualDate() else null
                 )
                 viewModel.updateTask(newTask.toEntity())
             }
