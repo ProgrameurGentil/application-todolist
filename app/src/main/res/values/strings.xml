@@ -51,4 +51,9 @@
     <string name="etat_etat">État : %1$s</string>
     <string name="priorite">Priorité</string>
     <string name="etat_priorite">Priorité : %1$s</string>
+    <string name="petit_blague">Petite blague XD</string>
+    <string name="reponse">Reponse</string>
+    <string name="reponse_blague">lol | Reponse | lol</string>
+    <string name="auteur_blague">"De %1$s"</string>
+    <string name="retour_a_app">Ahahah ! Retour à l\'app</string>
 </resources>

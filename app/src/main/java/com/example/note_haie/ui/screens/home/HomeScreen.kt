@@ -51,6 +51,7 @@ import com.example.note_haie.ui.components.ConfirmModal
 import com.example.note_haie.ui.components.FloatingButton
 import com.example.note_haie.ui.components.FooterView
 import com.example.note_haie.ui.components.HeaderView
+import com.example.note_haie.ui.components.JokeModal
 import com.example.note_haie.ui.components.PanelTask
 import com.example.note_haie.ui.components.TaskButton
 import com.example.note_haie.ui.theme.LightWhite
@@ -64,6 +65,8 @@ import kotlinx.coroutines.launch
 fun HomeScreen(viewModel: TaskViewModel, navController: NavHostController) {
     val tasksInProgress by viewModel.notValidatedTask().collectAsState(initial = emptyList())
     val tasksFinished by viewModel.validatedTask().collectAsState(initial = emptyList())
+
+    var showJoke by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
 
@@ -103,6 +106,7 @@ fun HomeScreen(viewModel: TaskViewModel, navController: NavHostController) {
                 )
                 viewModel.updateTask(newTask.toEntity())
             }
+            showJoke = newValue
         },
         navigateToNewTask = {
             navController.navigate("new-task")
@@ -117,6 +121,10 @@ fun HomeScreen(viewModel: TaskViewModel, navController: NavHostController) {
             }
         }
     )
+
+    if (showJoke) {
+        JokeModal(onDismiss = {showJoke = false})
+    }
 }
 
 @Composable
