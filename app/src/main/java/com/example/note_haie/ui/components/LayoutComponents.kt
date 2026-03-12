@@ -1,5 +1,9 @@
 package com.example.note_haie.ui.components
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -8,6 +12,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -29,6 +34,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -607,6 +613,66 @@ fun ButtonView(text: String, colors: ButtonColors, onClick: () -> Unit) {
     }
 }
 
+@Composable
+fun ImagePicker() {
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = { uri -> imageUri = uri }
+    )
+
+    Column(
+        modifier = Modifier
+    ) {
+        TitleEntryView(question = stringResource(R.string.image), isRequired = false)
+        Box(
+            modifier = Modifier
+                .height(400.dp)
+                .width(300.dp)
+        ) {
+            if (imageUri == null) {
+
+            }
+            OutlinedButton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight()
+                    .background(
+                        color = LightNightBlue,
+                        shape = RoundedCornerShape(25.dp)
+                    ),
+                shape = RoundedCornerShape(25.dp),
+                onClick = {
+                    launcher.launch(
+                        PickVisualMediaRequest(
+                            ActivityResultContracts.PickVisualMedia.ImageOnly
+                        )
+                    )
+                }
+            ) {
+                Text(
+                    text = stringResource(R.string.choisir_image),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = Black
+                )
+            }
+        }
+    }
+
+
+//    if (imageUri != null) {
+//        AsyncImage(
+//            model = imageUri,
+//            contentDescription = "Image sélectionnée",
+//            modifier = Modifier
+//                .size(200.dp)
+//                .clip(RoundedCornerShape(8.dp)),
+//            contentScale = ContentScale.Crop
+//        )
+//    }
+}
+
+
 /* Previews */
 
 @Preview(showBackground = false)
@@ -694,6 +760,15 @@ fun ButtonViewPreview() {
             text = "hello world",
             onClick = {},
             colors = ButtonColors(LightRed, Black, LightRed, LightRed)
+        )
+    }
+}
+
+@Preview(showBackground = false)
+@Composable
+fun ImagePickerPreview() {
+    NoteHaieTheme {
+        ImagePicker(
         )
     }
 }

@@ -56,4 +56,6 @@
     <string name="reponse_blague">lol | Reponse | lol</string>
     <string name="auteur_blague">"De %1$s"</string>
     <string name="retour_a_app">Ahahah ! Retour à l\'app</string>
+    <string name="choisir_image">Choisissez une image</string>
+    <string name="image">Image :</string>
 </resources>
