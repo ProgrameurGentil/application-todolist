@@ -87,6 +87,7 @@ fun UpdateTaskScreenContent(task: Task, navigateToBack: () -> Boolean, navigateT
     var hourResponse by remember { mutableStateOf<Int?>(date?.hour) }
     var minuteResponse by remember { mutableStateOf<Int?>(date?.minute) }
     var dateResponse  by remember { mutableStateOf<Long?>(getDateWithUnixTime(task.date)) }
+    var fileResponse by remember { mutableStateOf<String?>(null) }
 
     var showModalError by remember { mutableStateOf(false) }
     var titleModalError by remember { mutableStateOf("Erreur") }
@@ -134,10 +135,11 @@ fun UpdateTaskScreenContent(task: Task, navigateToBack: () -> Boolean, navigateT
             setDateResponse = {
                 dateResponse = it
             },
+            setFileResponse = {
+                fileResponse = it
+            },
             textButtonAccept = labelAccept,
             onClickAccept = {
-                // TODO("faire dans les prochaines versions toutes les vérifications")
-
                 val title = titleResponse
                 val date = getUnixTimeWithDecomposedTime(dateResponse, hourResponse, minuteResponse)
 
@@ -149,14 +151,14 @@ fun UpdateTaskScreenContent(task: Task, navigateToBack: () -> Boolean, navigateT
                     val newTask = copyTask(
                         task = task,
                         name = titleResponse ?: task.name,
-                        date = if (date == 0L) null else date, //TODO ne correspond qu'a un temps unique
+                        date = if (date == 0L) null else date,
                         description = descriptionResponse ?: task.description,
                         isValidated = task.isValidated,
                         stateTime = task.stateTime,
                         state = task.state,
                         periodicy = periodicityResponse ?: task.periodicy,
                         priority = priorityResponse ?: task.priority,
-                        file = task.file
+                        file = fileResponse
                     )
 
                     updateTask(newTask)

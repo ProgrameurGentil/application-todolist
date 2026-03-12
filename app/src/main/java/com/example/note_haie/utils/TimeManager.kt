@@ -114,7 +114,7 @@ fun getDateWithUnixTime(unixTime: Long, zoneId: ZoneId = ZoneId.systemDefault())
 
 fun getDateWithUnixTime(unixTime: Long?, zoneId: ZoneId =  ZoneId.systemDefault()): Long? {
     if (unixTime != null) {
-        return getDateWithUnixTime(unixTime)
+        return getDateWithUnixTime(unixTime, zoneId = zoneId)
     }
     return null
 }

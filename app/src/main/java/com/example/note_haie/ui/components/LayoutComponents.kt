@@ -1,5 +1,6 @@
 package com.example.note_haie.ui.components
 
+import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -43,6 +44,7 @@ import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,14 +53,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.input.KeyboardType.Companion.Uri
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import com.example.note_haie.R
 import com.example.note_haie.model.EnumPeriodicyTask
 import com.example.note_haie.model.EnumPriorityLevel
@@ -614,12 +620,28 @@ fun ButtonView(text: String, colors: ButtonColors, onClick: () -> Unit) {
 }
 
 @Composable
-fun ImagePicker() {
-    var imageUri by remember { mutableStateOf<Uri?>(null) }
+fun ImagePicker(uri: Uri? = null, onImageSelected: (String?) -> Unit) {
+    val context = LocalContext.current
+    var imageUri by remember { mutableStateOf(uri) }
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri -> imageUri = uri }
+        onResult = { uriContent ->
+            var uri = uriContent
+            if (uri != null) {
+                try {
+                    val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    context.contentResolver.takePersistableUriPermission(uri, flags)
+                } catch (e: Exception) {
+                    uri = null // cela veut dire que le fichier n est pas supporte
+                }
+            }
+            imageUri = uri
+            onImageSelected(uri?.toString())
+        }
     )
+    LaunchedEffect(uri) {
+        onImageSelected(uri?.toString())
+    }
 
     Column(
         modifier = Modifier
@@ -627,49 +649,54 @@ fun ImagePicker() {
         TitleEntryView(question = stringResource(R.string.image), isRequired = false)
         Box(
             modifier = Modifier
-                .height(400.dp)
-                .width(300.dp)
+                .size(200.dp)
         ) {
             if (imageUri == null) {
-
-            }
-            OutlinedButton(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight()
-                    .background(
-                        color = LightNightBlue,
-                        shape = RoundedCornerShape(25.dp)
-                    ),
-                shape = RoundedCornerShape(25.dp),
-                onClick = {
-                    launcher.launch(
-                        PickVisualMediaRequest(
-                            ActivityResultContracts.PickVisualMedia.ImageOnly
+                OutlinedButton(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight()
+                        .background(
+                            color = LightNightBlue.copy(0.5f),
+                            shape = RoundedCornerShape(25.dp)
+                        ),
+                    shape = RoundedCornerShape(25.dp),
+                    onClick = {
+                        launcher.launch(
+                            PickVisualMediaRequest(
+                                ActivityResultContracts.PickVisualMedia.ImageOnly
+                            )
                         )
+                    }
+                ) {
+                    Text(
+                        text = stringResource(R.string.choisir_image),
+                        color = White
                     )
                 }
-            ) {
-                Text(
-                    text = stringResource(R.string.choisir_image),
-                    style = MaterialTheme.typography.titleLarge,
-                    color = Black
+            } else {
+                AsyncImage(
+                    model = imageUri,
+                    contentDescription = stringResource(R.string.desc_imgage_selectionnee),
+                    modifier = Modifier
+                        .size(200.dp)
+                        .clip(RoundedCornerShape(8.dp)),
+                    contentScale = ContentScale.Crop
                 )
+                TextButton(
+                    onClick = {
+                        imageUri = null
+                        onImageSelected(null)
+                    }
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.croix_64),
+                        contentDescription = stringResource(R.string.desc_croix)
+                    )
+                }
             }
         }
     }
-
-
-//    if (imageUri != null) {
-//        AsyncImage(
-//            model = imageUri,
-//            contentDescription = "Image sélectionnée",
-//            modifier = Modifier
-//                .size(200.dp)
-//                .clip(RoundedCornerShape(8.dp)),
-//            contentScale = ContentScale.Crop
-//        )
-//    }
 }
 
 
@@ -769,6 +796,7 @@ fun ButtonViewPreview() {
 fun ImagePickerPreview() {
     NoteHaieTheme {
         ImagePicker(
+            onImageSelected = {}
         )
     }
 }

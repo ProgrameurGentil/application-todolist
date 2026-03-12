@@ -58,4 +58,7 @@
     <string name="retour_a_app">Ahahah ! Retour à l\'app</string>
     <string name="choisir_image">Choisissez une image</string>
     <string name="image">Image :</string>
+    <string name="supprimer_image">Supprimer l\'image</string>
+    <string name="desc_imgage_selectionnee">Image sélectionnée</string>
+    <string name="desc_croix">croix</string>
 </resources>

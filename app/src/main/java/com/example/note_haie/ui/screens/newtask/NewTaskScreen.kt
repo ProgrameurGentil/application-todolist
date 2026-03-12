@@ -73,6 +73,7 @@ fun NewTaskScreenContent(addTask: (Task) -> Unit, navigateToBack: () -> Boolean,
     var hourResponse by remember { mutableStateOf<Int?>(null) }
     var minuteResponse by remember { mutableStateOf<Int?>(null) }
     var dateResponse  by remember { mutableStateOf<Long?>(null) }
+    var fileResponse by remember { mutableStateOf<String?>(null) }
 
     val labelAccept = stringResource(R.string.valider)
     val labelCancel = stringResource(R.string.annuler)
@@ -113,6 +114,9 @@ fun NewTaskScreenContent(addTask: (Task) -> Unit, navigateToBack: () -> Boolean,
             setDateResponse = {
                 dateResponse = it
             },
+            setFileResponse = {
+                fileResponse = it
+            },
             textButtonCancel = labelCancel,
             onClickCancel = {
                 if (!navigateToBack())
@@ -135,11 +139,10 @@ fun NewTaskScreenContent(addTask: (Task) -> Unit, navigateToBack: () -> Boolean,
                     state = EnumStateTask.NOT_REALISED,
                     periodicy = periodicityResponse ?: EnumPeriodicyTask.SINGLE,
                     priority = priorityResponse ?: EnumPriorityLevel.LVL1,
-                    file = null
+                    file = fileResponse
                 )
                 addTask(task)
                 navigateToHome()
-
             }
         )
         FooterView()
