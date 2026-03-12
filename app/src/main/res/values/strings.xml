@@ -49,4 +49,6 @@
     <string name="champ_vide_time_tache">Vous avez oubliez de remplir le champ du temps (heure.s et minute.s) de la tache</string>
     <string name="etat_periodicite">Peridodicité : %1$s</string>
     <string name="etat_etat">État : %1$s</string>
+    <string name="priorite">Priorité</string>
+    <string name="etat_priorite">Priorité : %1$s</string>
 </resources>

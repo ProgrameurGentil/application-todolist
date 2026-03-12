@@ -33,6 +33,7 @@ fun TaskEntity.toDomain(): Task {
         stateTime = stateTime,
         state = state,
         periodicy = this.periodicy,
+        priority = this.priority,
         file = this.file,
     )
 }
@@ -46,6 +47,7 @@ fun Task.toEntity(): TaskEntity {
         title = this.name,
         description = this.description,
         periodicy = this.periodicy,
+        priority = this.priority,
         date = this.date,
         dateValidated = dateValidated,
         file = this.file,

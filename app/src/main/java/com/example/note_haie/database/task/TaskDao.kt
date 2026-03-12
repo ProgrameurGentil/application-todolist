@@ -4,12 +4,11 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.example.note_haie.model.Task
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TaskDao {
-    @Query("SELECT * FROM tasks ORDER BY date ASC")
+    @Query("SELECT * FROM tasks ORDER BY priority DESC, date ASC")
     fun getAllTasks(): Flow<List<TaskEntity>>
 
     @Query("DELETE FROM tasks WHERE id = :id")
@@ -21,12 +20,13 @@ interface TaskDao {
     @Insert
     suspend fun insert(task: TaskEntity)
 
-    @Query("SELECT * FROM tasks WHERE is_validated == True ORDER BY date ASC")
+    @Query("SELECT * FROM tasks WHERE is_validated = 1 ORDER BY priority DESC, date ASC")
     fun getValidatedTask(): Flow<List<TaskEntity>>
 
-    @Query("SELECT * FROM tasks WHERE is_validated == False ORDER BY date ASC")
+    // On utilise 0 pour False et on ajoute priority DESC pour le tri
+    @Query("SELECT * FROM tasks WHERE is_validated = 0 ORDER BY priority DESC, date ASC")
     fun getNotValidatedTask(): Flow<List<TaskEntity>>
 
-    @Query("SELECT * FROM tasks WHERE id == :id")
+    @Query("SELECT * FROM tasks WHERE id = :id")
     fun getTaskWithId(id: Int): Flow<TaskEntity?>
 }

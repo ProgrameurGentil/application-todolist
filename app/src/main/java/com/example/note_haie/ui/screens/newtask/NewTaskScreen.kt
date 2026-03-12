@@ -24,6 +24,7 @@ import androidx.navigation.NavHostController
 import com.example.note_haie.R
 import com.example.note_haie.database.task.toEntity
 import com.example.note_haie.model.EnumPeriodicyTask
+import com.example.note_haie.model.EnumPriorityLevel
 import com.example.note_haie.model.EnumStateTask
 import com.example.note_haie.model.EnumStateTimeTask
 import com.example.note_haie.model.Task
@@ -68,6 +69,7 @@ fun NewTaskScreenContent(addTask: (Task) -> Unit, navigateToBack: () -> Boolean,
     var titleResponse by remember { mutableStateOf<String?>(null) }
     var descriptionResponse by remember { mutableStateOf<String?>(null) }
     var periodicityResponse by remember { mutableStateOf<EnumPeriodicyTask?>(null) }
+    var priorityResponse by remember { mutableStateOf<EnumPriorityLevel?>(null) }
     var hourResponse by remember { mutableStateOf<Int?>(null) }
     var minuteResponse by remember { mutableStateOf<Int?>(null) }
     var dateResponse  by remember { mutableStateOf<Long?>(null) }
@@ -99,6 +101,9 @@ fun NewTaskScreenContent(addTask: (Task) -> Unit, navigateToBack: () -> Boolean,
             setPeriodicyResponse = {
                 periodicityResponse = it
             },
+            setPriorityResponse = {
+                priorityResponse = it
+            },
             setHourResponse = {
                 hourResponse = it
             },
@@ -129,6 +134,7 @@ fun NewTaskScreenContent(addTask: (Task) -> Unit, navigateToBack: () -> Boolean,
                     stateTime = EnumStateTimeTask.NONE,
                     state = EnumStateTask.NOT_REALISED,
                     periodicy = periodicityResponse ?: EnumPeriodicyTask.SINGLE,
+                    priority = priorityResponse ?: EnumPriorityLevel.LVL1,
                     file = null
                 )
                 addTask(task)

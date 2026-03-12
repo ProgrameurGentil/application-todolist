@@ -19,6 +19,23 @@ enum class EnumStateTask {
     REALISED, NOT_REALISED
 }
 
+enum class EnumPriorityLevel {
+    LVL1, LVL2, LVL3
+}
+
+val EnumPriorityLevel.label: String
+    get() = when (this) {
+        EnumPriorityLevel.LVL1 -> "Niv. Bas"
+        EnumPriorityLevel.LVL2 -> "Niv. Moyen"
+        EnumPriorityLevel.LVL3 -> "Niv. Elevé"
+    }
+
+val EnumPriorityLevel.value: Int
+    get() = when (this) {
+        EnumPriorityLevel.LVL1 -> 1
+        EnumPriorityLevel.LVL2 -> 2
+        EnumPriorityLevel.LVL3 -> 3
+    }
 
 data class Task(
     val id: Int,
@@ -30,6 +47,7 @@ data class Task(
     val stateTime: EnumStateTimeTask,
     val state: EnumStateTask,
     val periodicy: EnumPeriodicyTask,
+    val priority: EnumPriorityLevel,
     val file: String? = null
 )
 
@@ -44,6 +62,7 @@ data class Task(
  * @param stateTime l'etat au niveau de temps (en retard, a l'heure, rien)
  * @param state l'etat de la tache (valider, non valider)
  * @param periodicy la pariodicite
+ * @param priority la priorite (Lvl1, Lvl2, Lvl3)
  * @param file l'url du fichier associe
  * @return Task - une tache
  */
@@ -57,6 +76,7 @@ fun copyTask(
     stateTime: EnumStateTimeTask? = null,
     state: EnumStateTask? = null,
     periodicy: EnumPeriodicyTask? = null,
+    priority: EnumPriorityLevel? = null,
     file: String? = null): Task {
     return Task(
         id = task.id,
@@ -68,20 +88,22 @@ fun copyTask(
         stateTime = stateTime ?: task.stateTime,
         state = state ?: task.state,
         periodicy = periodicy ?: task.periodicy,
+        priority = priority ?: task.priority,
         file = file ?: task.file
     )
 
 }
 
+// pour les tests
 object ExempleTask {
     val tasks = listOf(
         Task(0,"Tache1", 1772318526000, null, "Description tache 1",
-            mutableStateOf(false), EnumStateTimeTask.NONE, EnumStateTask.NOT_REALISED, EnumPeriodicyTask.SINGLE),
+            mutableStateOf(false), EnumStateTimeTask.NONE, EnumStateTask.NOT_REALISED, EnumPeriodicyTask.SINGLE, EnumPriorityLevel.LVL1),
         Task(1,"Tache2", 1772318526000, null, "Description tache 2",
-            mutableStateOf(false), EnumStateTimeTask.IN_TIME, EnumStateTask.NOT_REALISED, EnumPeriodicyTask.WEEKLY),
+            mutableStateOf(false), EnumStateTimeTask.IN_TIME, EnumStateTask.NOT_REALISED, EnumPeriodicyTask.WEEKLY, EnumPriorityLevel.LVL1),
         Task(2,"Tache3", 1772318526000, null, "Description tache 3",
-            mutableStateOf(false), EnumStateTimeTask.LATE, EnumStateTask.NOT_REALISED, EnumPeriodicyTask.MONTHLY),
+            mutableStateOf(false), EnumStateTimeTask.LATE, EnumStateTask.NOT_REALISED, EnumPeriodicyTask.MONTHLY, EnumPriorityLevel.LVL1),
         Task(3,"Nom de la tache", 1772318526000, null, "Description",
-            mutableStateOf(true), EnumStateTimeTask.NONE, EnumStateTask.REALISED, EnumPeriodicyTask.DAILY)
+            mutableStateOf(true), EnumStateTimeTask.NONE, EnumStateTask.REALISED, EnumPeriodicyTask.DAILY, EnumPriorityLevel.LVL1)
     )
 }
