@@ -125,12 +125,12 @@ fun getUnixTimeIsPassed(unixTime: Long): Boolean {
 }
 
 /**
- * Args:
- *  date: Long? -> JJ/MM/AA sous le forme Unix en millisecond
- *  hour: Int? -> HH sous la forme d'un nombre entier entre 0 et 23
- *  minute: Int? -> mm sous la forme d'un nombre entier entre 0 et 59
- * Return:
- *  Long -> Le temps en format Unix. Si 'date' est null, alors la date sera remplacer par celle du jour.
+ * Donne le temps en Unix millisecond en fonction de la date, de l'heure et de la minute
+ * @param date le jour, le mois et l'annee sous le forme Unix en millisecond
+ * @param hour l'heure sous la forme d'un nombre entier entre 0 et 23
+ * @param minute la minute sous la forme d'un nombre entier entre 0 et 59
+ *
+ * @return Long - Le temps en format Unix. Si 'date' est null, alors la date sera remplacer par celle du jour.
  */
 fun getUnixTimeWithDecomposedTime(date: Long?, hour: Int?, minute: Int?): Long {
 
@@ -150,4 +150,25 @@ fun getUnixTimeWithDecomposedTime(date: Long?, hour: Int?, minute: Int?): Long {
     val minuteValue = (minute ?: 0) * TimeInMs.MINUTE.value
 
     return dateValue + hourValue + minuteValue
+}
+
+/**
+ * Ajoute du temps a du temps
+ * @param date le temps au format Unix millisecond
+ * @param year l'annee comprise dans un entier de 32 bis
+ * @param month le mois compris dans un entier de 32 bits
+ * @param week le mois compris dans un entier de 32 bits
+ * @param day le jour compris dans un entier de 32 bits
+ * @param hour l'heure comprise dans un entier de 32 bits
+ * @param minute la minute comprise dans un entier de 32 bits
+ * @return Long - Le nouveau temps au format Unix millisecond
+ */
+fun addTimeInDate(date: Long, year: Int = 0, month: Int = 0, week:Int = 0, day: Int = 0, hour: Int = 0, minute: Int = 0): Long {
+    return date +
+            year * TimeInMs.YEAR.value +
+            month * TimeInMs.MONTH.value +
+            week * TimeInMs.WEEK.value +
+            day * TimeInMs.DAY.value +
+            hour * TimeInMs.HOUR.value +
+            minute * TimeInMs.MINUTE.value
 }

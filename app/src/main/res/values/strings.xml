@@ -47,4 +47,6 @@
     <string name="message_confirmation_suppr_tache">Êtes-vous sûr de vouloir supprimer la tache \' %1$s \' ? \n\nCette action est définitive.</string>
     <string name="champ_vide_date_tache">Vous avez oubliez de remplir le champ de la date de la tache</string>
     <string name="champ_vide_time_tache">Vous avez oubliez de remplir le champ du temps (heure.s et minute.s) de la tache</string>
+    <string name="etat_periodicite">Peridodicité : %1$s</string>
+    <string name="etat_etat">État : %1$s</string>
 </resources>

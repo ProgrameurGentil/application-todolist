@@ -256,10 +256,16 @@ fun PanelTask(task: Task, onValidatedTask: (Task, Boolean) -> Unit, onDismiss: (
                 HorizontalDivider(thickness = 2.dp, modifier = Modifier.padding(vertical = 20.dp))
                 if (task.stateTime != EnumStateTimeTask.NONE) {
                     Text(
-                        text = "État : ${task.stateTime.label}",
+                        text = stringResource(R.string.etat_etat, task.stateTime.label),
                         style = MaterialTheme.typography.titleMedium
                     )
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
+
+                Text(
+                    text = stringResource(R.string.etat_periodicite, task.periodicy.label),
+                    style = MaterialTheme.typography.titleMedium
+                )
 
                 Spacer(modifier = Modifier.height(10.dp))
             }

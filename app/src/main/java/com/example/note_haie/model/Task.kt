@@ -19,18 +19,6 @@ enum class EnumStateTask {
     REALISED, NOT_REALISED
 }
 
-enum class EnumPeriodicyTask {
-    SINGLE, DAILY, WEEKLY, MONTHLY
-}
-
-val EnumPeriodicyTask.label: String
-    get() = when (this) {
-        EnumPeriodicyTask.SINGLE -> "Une seule fois"
-        EnumPeriodicyTask.DAILY  -> "Tout les jours"
-        EnumPeriodicyTask.WEEKLY -> "Une fois par semaine"
-        else                     -> "Une fois par mois"
-    }
-
 data class Task(
     val id: Int,
     val name: String,
@@ -55,4 +43,3 @@ object ExempleTask {
             mutableStateOf(true), EnumStateTimeTask.NONE, EnumStateTask.REALISED, EnumPeriodicyTask.DAILY)
     )
 }
-

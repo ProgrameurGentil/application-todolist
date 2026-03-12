@@ -128,7 +128,7 @@ fun NewTaskScreenContent(addTask: (Task) -> Unit, navigateToBack: () -> Boolean,
                     isValidated = mutableStateOf(false),
                     stateTime = EnumStateTimeTask.NONE,
                     state = EnumStateTask.NOT_REALISED,
-                    periodicy = EnumPeriodicyTask.SINGLE,
+                    periodicy = periodicityResponse ?: EnumPeriodicyTask.SINGLE,
                     file = null
                 )
                 addTask(task)

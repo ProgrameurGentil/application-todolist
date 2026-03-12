@@ -44,6 +44,7 @@ import com.example.note_haie.R
 import com.example.note_haie.database.task.toEntity
 import com.example.note_haie.model.ExempleTask
 import com.example.note_haie.model.Task
+import com.example.note_haie.model.updateDateWithPeriodicy
 import com.example.note_haie.ui.components.ConfirmModal
 import com.example.note_haie.ui.components.FloatingButton
 import com.example.note_haie.ui.components.FooterView
@@ -67,8 +68,18 @@ fun HomeScreen(viewModel: TaskViewModel, navController: NavHostController) {
         tasksFinished = tasksFinished,
         onValidatedTask = { task, newValue ->
             scope.launch {
-                task.isValidated.value = newValue
-                viewModel.updateTask(task.toEntity())
+                val newTask = Task(
+                    id = task.id,
+                    name = task.name,
+                    date = if (task.date == null) null else updateDateWithPeriodicy(task.periodicy, task.date),
+                    description = task.description,
+                    isValidated = mutableStateOf(newValue),
+                    stateTime = task.stateTime,
+                    state = task.state,
+                    periodicy = task.periodicy,
+                    file = task.file
+                )
+                viewModel.updateTask(newTask.toEntity())
             }
         },
         navigateToNewTask = {
