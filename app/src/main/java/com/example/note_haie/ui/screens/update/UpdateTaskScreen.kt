@@ -25,9 +25,11 @@ import androidx.navigation.NavHostController
 import com.example.note_haie.R
 import com.example.note_haie.database.task.toEntity
 import com.example.note_haie.model.EnumPeriodicyTask
+import com.example.note_haie.model.EnumPriorityLevel
 import com.example.note_haie.model.ExempleTask
 import com.example.note_haie.model.Task
 import com.example.note_haie.model.addAlarm
+import com.example.note_haie.model.copyTask
 import com.example.note_haie.ui.components.ButtonView
 import com.example.note_haie.ui.components.ErrorModal
 import com.example.note_haie.ui.components.FooterView
@@ -80,6 +82,7 @@ fun UpdateTaskScreenContent(task: Task, navigateToBack: () -> Boolean, navigateT
     var titleResponse by remember { mutableStateOf<String?>(task.name) }
     var descriptionResponse by remember { mutableStateOf<String?>(task.description) }
     var periodicityResponse by remember { mutableStateOf<EnumPeriodicyTask?>(task.periodicy) }
+    var priorityResponse by remember { mutableStateOf<EnumPriorityLevel?>(null) }
     val date = decomposeUnixTime(task.date)
     var hourResponse by remember { mutableStateOf<Int?>(date?.hour) }
     var minuteResponse by remember { mutableStateOf<Int?>(date?.minute) }
@@ -119,6 +122,9 @@ fun UpdateTaskScreenContent(task: Task, navigateToBack: () -> Boolean, navigateT
             setPeriodicyResponse = {
                 periodicityResponse = it
             },
+            setPriorityResponse = {
+                priorityResponse = it
+            },
             setHourResponse = {
                 hourResponse = it
             },
@@ -140,8 +146,8 @@ fun UpdateTaskScreenContent(task: Task, navigateToBack: () -> Boolean, navigateT
                     textModalError = errorEmptyFieldName
                     showModalError = true
                 } else {
-                    val newTask = Task(
-                        id = task.id,
+                    val newTask = copyTask(
+                        task = task,
                         name = titleResponse ?: task.name,
                         date = if (date == 0L) null else date, //TODO ne correspond qu'a un temps unique
                         description = descriptionResponse ?: task.description,
@@ -149,8 +155,10 @@ fun UpdateTaskScreenContent(task: Task, navigateToBack: () -> Boolean, navigateT
                         stateTime = task.stateTime,
                         state = task.state,
                         periodicy = periodicityResponse ?: task.periodicy,
+                        priority = priorityResponse ?: task.priority,
                         file = task.file
                     )
+
                     updateTask(newTask)
                     navigateToHome()
                 }

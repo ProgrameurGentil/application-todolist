@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
@@ -41,6 +42,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.note_haie.R
 import com.example.note_haie.model.EnumPeriodicyTask
+import com.example.note_haie.model.EnumPriorityLevel
 import com.example.note_haie.model.EnumStateTimeTask
 import com.example.note_haie.model.ExempleTask
 import com.example.note_haie.model.Task
@@ -60,7 +62,6 @@ import com.example.note_haie.ui.theme.Red
 import com.example.note_haie.ui.theme.White
 import com.example.note_haie.utils.decomposeUnixTime
 import com.example.note_haie.utils.getDateWithUnixTime
-import com.example.note_haie.utils.getUnixTimeWithDecomposedTime
 import com.example.note_haie.utils.unixToUtc
 
 @Composable
@@ -254,6 +255,14 @@ fun PanelTask(task: Task, onValidatedTask: (Task, Boolean) -> Unit, onDismiss: (
                 }
 
                 HorizontalDivider(thickness = 2.dp, modifier = Modifier.padding(vertical = 20.dp))
+
+                Text(
+                    text = stringResource(R.string.etat_priorite, task.priority.label),
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
                 if (task.stateTime != EnumStateTimeTask.NONE) {
                     Text(
                         text = stringResource(R.string.etat_etat, task.stateTime.label),
@@ -304,6 +313,7 @@ fun FormTask(
     setTitleResponse: (String) -> Unit,
     setDescriptionResponse: (String) -> Unit,
     setPeriodicyResponse: (EnumPeriodicyTask) -> Unit,
+    setPriorityResponse: (EnumPriorityLevel) -> Unit,
     setDateResponse: (Long) -> Unit,
     setHourResponse: (Int) -> Unit,
     setMinuteResponse: (Int) -> Unit,
@@ -367,6 +377,7 @@ fun FormTask(
 
     LaunchedEffect(task) {
         task?.let {
+            titleResponse = task.name
             changePeriodicy(task.periodicy)
             it.date?.let {date ->
                 val dateTime = decomposeUnixTime(date)
@@ -377,121 +388,134 @@ fun FormTask(
         }
     }
 
-    Column(
+    LazyColumn(
         modifier = modifier,
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        Column(
-            horizontalAlignment = Alignment.Start,
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.headlineMedium,
-                color = White
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            EntryView(
-                question = stringResource(R.string.titre),
-                placeholder = stringResource(R.string.titre_ici),
-                isRequired = true,
-                textColor = White,
-                valueResponse =  task?.name ?: "",
-                setResponse = {
-                    titleResponse = it
-                    setTitleResponse(it)
-                }
-            )
-
-            BigEntryView(
-                question = stringResource(R.string.description),
-                placeholder = stringResource(R.string.description_ici),
-                isRequired = false,
-                textColor = White,
-                valueResponse = task?.description ?: "",
-                setResponse = {
-                    setDescriptionResponse(it)
-                }
-            )
-
-            SelectBoxView(
-                question = stringResource(R.string.periodicite),
-                isRequired = true,
-                textColor = White,
-                optionValue = task?.periodicy,
-                setSelectedOption = {
-                    setPeriodicyResponse(it)
-                    changePeriodicy(it)
-                }
-            )
-
-            if (dateIsRequired || timeIsRequired || periodicyIsSingle) {
-                SelectTimeView(
-                    valueDate = dateResponse,
-                    setDateResponse = {
-                        setDateResponse(it)
-                        dateResponse = it
-                    },
-                    valueHour = hourResponse,
-                    setHourResponse = {
-                        setHourResponse(it)
-                        hourResponse = it
-                    },
-                    valueMinute = minuteResponse,
-                    setMinuteResponse = {
-                        setMinuteResponse(it)
-                        minuteResponse = it
-                    },
-                    dateIsRequired = dateIsRequired,
-                    timeIsRequired = timeIsRequired,
-                    show = periodicyIsSingle
+        item {
+            Column(
+                horizontalAlignment = Alignment.Start,
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = White
                 )
-            } else {
-                Spacer(modifier = Modifier.height(10.dp))
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                EntryView(
+                    question = stringResource(R.string.titre),
+                    placeholder = stringResource(R.string.titre_ici),
+                    isRequired = true,
+                    textColor = White,
+                    valueResponse =  task?.name ?: "",
+                    setResponse = {
+                        titleResponse = it
+                        setTitleResponse(it)
+                    }
+                )
+
+                BigEntryView(
+                    question = stringResource(R.string.description),
+                    placeholder = stringResource(R.string.description_ici),
+                    isRequired = false,
+                    textColor = White,
+                    valueResponse = task?.description ?: "",
+                    setResponse = {
+                        setDescriptionResponse(it)
+                    }
+                )
+
+                SelectBoxViewPriority(
+                    question = stringResource(R.string.priorite),
+                    isRequired = true,
+                    textColor = White,
+                    optionValue = null,
+                    setSelectedOption = {
+                        setPriorityResponse(it)
+                    }
+                )
+
+                SelectBoxViewPeriodicy(
+                    question = stringResource(R.string.periodicite),
+                    isRequired = true,
+                    textColor = White,
+                    optionValue = task?.periodicy,
+                    setSelectedOption = {
+                        setPeriodicyResponse(it)
+                        changePeriodicy(it)
+                    }
+                )
+
+                if (dateIsRequired || timeIsRequired || periodicyIsSingle) {
+                    SelectTimeView(
+                        valueDate = dateResponse,
+                        setDateResponse = {
+                            setDateResponse(it)
+                            dateResponse = it
+                        },
+                        valueHour = hourResponse,
+                        setHourResponse = {
+                            setHourResponse(it)
+                            hourResponse = it
+                        },
+                        valueMinute = minuteResponse,
+                        setMinuteResponse = {
+                            setMinuteResponse(it)
+                            minuteResponse = it
+                        },
+                        dateIsRequired = dateIsRequired,
+                        timeIsRequired = timeIsRequired,
+                        show = periodicyIsSingle
+                    )
+                } else {
+                    Spacer(modifier = Modifier.height(10.dp))
+                }
+
+                LabelRequired()
             }
 
-            LabelRequired()
-        }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                ButtonView(
+                    text = textButtonCancel,
+                    colors = ButtonColors(LightRed, Black, LightRed, LightRed),
+                    onClick = onClickCancel
+                )
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.End
-        ) {
-            ButtonView(
-                text = textButtonCancel,
-                colors = ButtonColors(LightRed, Black, LightRed, LightRed),
-                onClick = onClickCancel
-            )
-
-            ButtonView(
-                text = textButtonAccept,
-                colors = ButtonColors(LightGreen, Black, LightGreen, LightGreen),
-                onClick = {
-                    when {
-                        titleResponse.trim().isEmpty() -> {
-                            textModalError = errorEmptyFieldName
-                            showModalError = true
+                ButtonView(
+                    text = textButtonAccept,
+                    colors = ButtonColors(LightGreen, Black, LightGreen, LightGreen),
+                    onClick = {
+                        when {
+                            titleResponse.trim().isEmpty() -> {
+                                textModalError = errorEmptyFieldName
+                                showModalError = true
+                            }
+                            dateIsRequired && dateResponse == null -> {
+                                textModalError = errorEmptyFieldDate
+                                showModalError = true
+                            }
+                            timeIsRequired && (hourResponse == null || minuteResponse == null) -> {
+                                textModalError = errorEmptyFieldTime
+                                showModalError = true
+                            }
+                            else -> onClickAccept()
                         }
-                        dateIsRequired && dateResponse == null -> {
-                            textModalError = errorEmptyFieldDate
-                            showModalError = true
-                        }
-                        timeIsRequired && (hourResponse == null || minuteResponse == null) -> {
-                            textModalError = errorEmptyFieldDate
-                            showModalError = true
-                        }
-                        else -> onClickAccept()
                     }
-                }
-            )
+                )
+            }
         }
+
     }
 
     if (showModalError) {
-        ErrorModal(titleModalError, textModalError, {showModalError = false})
+        ErrorModal(titleModalError, textModalError, onDismiss = {showModalError = false})
     }
 }
 
@@ -510,6 +534,7 @@ fun FormTaskPreview() {
             setTitleResponse = {},
             setDescriptionResponse = {},
             setPeriodicyResponse = {},
+            setPriorityResponse = {},
             setDateResponse = {},
             setHourResponse = {},
             setMinuteResponse = {},
@@ -527,7 +552,7 @@ fun TaskViewPreview() {
     NoteHaieTheme {
         TaskView(
             ExempleTask.tasks[0],
-            {_, _ ->}
+            onValidatedTask = {_, _ ->}
         )
     }
 }

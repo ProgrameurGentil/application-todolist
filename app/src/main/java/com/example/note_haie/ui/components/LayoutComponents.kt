@@ -1,6 +1,5 @@
 package com.example.note_haie.ui.components
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -56,6 +55,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.note_haie.R
 import com.example.note_haie.model.EnumPeriodicyTask
+import com.example.note_haie.model.EnumPriorityLevel
 import com.example.note_haie.model.label
 import com.example.note_haie.ui.theme.Black
 import com.example.note_haie.ui.theme.DarkBlue
@@ -229,8 +229,84 @@ fun BigEntryView(question: String, placeholder: String, isRequired: Boolean, val
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SelectBoxView(question: String, isRequired: Boolean, optionValue: EnumPeriodicyTask? = null, setSelectedOption: (EnumPeriodicyTask) -> Unit, textColor: Color = White) {
+fun SelectBoxViewPeriodicy(
+    question: String,
+    isRequired: Boolean,
+    optionValue: EnumPeriodicyTask? = null,
+    setSelectedOption: (EnumPeriodicyTask) -> Unit,
+    textColor: Color = White
+) {
     val options = EnumPeriodicyTask.entries
+    var expanded by remember { mutableStateOf(false) }
+    var selectedOption by remember { mutableStateOf(optionValue?.label ?: options[0].label) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 5.dp)
+    ) {
+        TitleEntryView(question = question, isRequired = isRequired, textColor = textColor)
+
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = {expanded = !expanded}
+        ) {
+            TextField(
+                value = selectedOption,
+                onValueChange = {},
+                readOnly = true,
+                shape = RoundedCornerShape(16.dp),
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                modifier = Modifier
+                    .menuAnchor(
+                        type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
+                        enabled = true
+                    )
+                    .fillMaxWidth(),
+                colors = TextFieldDefaults.colors(
+                    // Couleur du fond (container)
+                    focusedContainerColor = LightNightBlue,
+                    unfocusedContainerColor = LightNightBlue.copy(alpha = 0.5f),
+
+                    // Couleur de la bordure (ou de l'indicateur bas)
+                    focusedIndicatorColor = LightNightBlue.copy(alpha = 0.5f),
+                    unfocusedIndicatorColor = LightNightBlue,
+
+                    // Couleur du texte et du curseur
+                    focusedTextColor = White,
+                    cursorColor = Color.Blue
+                )
+            )
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                options.forEach { selection ->
+                    DropdownMenuItem(
+                        text = { Text(selection.label) },
+                        onClick = {
+                            setSelectedOption(selection)
+                            selectedOption = selection.label
+                            expanded = false
+                        },
+                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SelectBoxViewPriority(
+    question: String,
+    isRequired: Boolean,
+    optionValue: EnumPriorityLevel? = null,
+    setSelectedOption: (EnumPriorityLevel) -> Unit,
+    textColor: Color = White
+) {
+    val options = EnumPriorityLevel.entries
     var expanded by remember { mutableStateOf(false) }
     var selectedOption by remember { mutableStateOf(optionValue?.label ?: options[0].label) }
 
@@ -561,9 +637,9 @@ fun BigEntryViewPreview() {
 
 @Preview(showBackground = false)
 @Composable
-fun SelectBoxViewPreview() {
+fun SelectBoxViewPeriodicyPreview() {
     NoteHaieTheme {
-        SelectBoxView(
+        SelectBoxViewPeriodicy(
             question = "Question de test :",
             isRequired = true,
             setSelectedOption = {}
