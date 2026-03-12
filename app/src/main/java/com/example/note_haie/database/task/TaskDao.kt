@@ -21,10 +21,10 @@ interface TaskDao {
     @Insert
     suspend fun insert(task: TaskEntity)
 
-    @Query("SELECT * FROM tasks WHERE is_validated == True")
+    @Query("SELECT * FROM tasks WHERE is_validated == True ORDER BY date ASC")
     fun getValidatedTask(): Flow<List<TaskEntity>>
 
-    @Query("SELECT * FROM tasks WHERE is_validated == False")
+    @Query("SELECT * FROM tasks WHERE is_validated == False ORDER BY date ASC")
     fun getNotValidatedTask(): Flow<List<TaskEntity>>
 
     @Query("SELECT * FROM tasks WHERE id == :id")

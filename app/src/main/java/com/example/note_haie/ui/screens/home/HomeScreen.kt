@@ -1,7 +1,6 @@
 package com.example.note_haie.ui.screens.home
 
 import android.Manifest
-import android.content.Context
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -22,10 +21,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -36,7 +35,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -44,8 +42,12 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.note_haie.R
 import com.example.note_haie.database.task.toEntity
+import com.example.note_haie.model.EnumStateTask
 import com.example.note_haie.model.ExempleTask
 import com.example.note_haie.model.Task
+import com.example.note_haie.model.copyTask
+import com.example.note_haie.model.updateDateWithPeriodicy
+import com.example.note_haie.ui.components.ConfirmModal
 import com.example.note_haie.ui.components.FloatingButton
 import com.example.note_haie.ui.components.FooterView
 import com.example.note_haie.ui.components.HeaderView
@@ -54,6 +56,7 @@ import com.example.note_haie.ui.components.TaskButton
 import com.example.note_haie.ui.theme.LightWhite
 import com.example.note_haie.ui.theme.MainBackground
 import com.example.note_haie.ui.theme.NoteHaieTheme
+import com.example.note_haie.utils.actualDate
 import com.example.note_haie.viewmodels.TaskViewModel
 import kotlinx.coroutines.launch
 
@@ -63,13 +66,42 @@ fun HomeScreen(viewModel: TaskViewModel, navController: NavHostController) {
     val tasksFinished by viewModel.validatedTask().collectAsState(initial = emptyList())
 
     val scope = rememberCoroutineScope()
+
+    LaunchedEffect(tasksFinished) {
+        tasksFinished.let {
+            it.forEach { task ->
+                task.date?.let {date -> // si une date est definit
+                    val newDate = updateDateWithPeriodicy(task.periodicy, task.date, task.dateValidated)
+
+                    if (date != newDate) { // si la date est differente alors cela signifi qu'on est un autre jour
+                        scope.launch {
+                            viewModel.updateTask(
+                                copyTask(
+                                    task = task,
+                                    dateValidated = null,
+                                    date = newDate,
+                                    isValidated = mutableStateOf(false),
+                                    state = EnumStateTask.NOT_REALISED
+                                ).toEntity()
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     HomeScreenContent(
         tasksInProgress = tasksInProgress,
         tasksFinished = tasksFinished,
         onValidatedTask = { task, newValue ->
             scope.launch {
-                task.isValidated.value = newValue
-                viewModel.updateTask(task.toEntity())
+                val newTask = copyTask(
+                    task = task,
+                    isValidated = mutableStateOf(newValue),
+                    dateValidated = if (newValue) actualDate() else null
+                )
+                viewModel.updateTask(newTask.toEntity())
             }
         },
         navigateToNewTask = {
@@ -78,6 +110,11 @@ fun HomeScreen(viewModel: TaskViewModel, navController: NavHostController) {
         navigateToUpDateTask = { id ->
             if (id <= 0) navController.navigate("home")
             navController.navigate("update-task/$id")
+        },
+        deleteTask = { id ->
+            scope.launch {
+                viewModel.deleteTask(id)
+            }
         }
     )
 }
@@ -88,12 +125,13 @@ fun HomeScreenContent(
     tasksFinished: List<Task>,
     onValidatedTask: (Task, Boolean) -> Unit,
     navigateToNewTask: () -> Unit,
-    navigateToUpDateTask: (Int) -> Unit
+    navigateToUpDateTask: (Int) -> Unit,
+    deleteTask: (Int) -> Unit
 ) {
 
     var taskSelected by remember { mutableStateOf<Task?>(null) }
     var showPermission by remember { mutableStateOf(true) }
-
+    var showConfirmModal by remember { mutableStateOf(false) }
 
     if (showPermission) {
         PermissionScreen(onResult = {showPermission = false})
@@ -231,9 +269,37 @@ fun HomeScreenContent(
                         onClickUpdate = {
                             taskSelected = null
                             navigateToUpDateTask(task.id)
+                        },
+                        onClickDelete = {
+                            showConfirmModal = true
                         }
                     )
                 }
+
+                if (showConfirmModal) {
+                    val currentTask = taskSelected
+                    if (currentTask != null) {
+                        val idTaskSelected = currentTask.id
+                        val nameTaskSelected = currentTask.name
+                        stringResource(R.string.message_confirmation_suppr_tache)
+                        ConfirmModal(
+                            title = stringResource(R.string.titre_suppression_tache),
+                            text = stringResource(R.string.message_confirmation_suppr_tache, nameTaskSelected),
+                            onDismiss = {
+                                showConfirmModal = false
+                            },
+                            onDismissTrue = {
+                                taskSelected = null
+                                deleteTask(idTaskSelected)
+                            },
+                            onDismissFalse = {}
+                        )
+                    } else {
+                        showConfirmModal = false
+                    }
+
+                }
+
             }
 
             FooterView()
@@ -264,6 +330,7 @@ fun HomeScreenPreview() {
             tasksInProgress = ExempleTask.tasks,
             tasksFinished = ExempleTask.tasks.subList(0, 2),
             {_, _ -> },
+            {},
             {},
             {}
         )

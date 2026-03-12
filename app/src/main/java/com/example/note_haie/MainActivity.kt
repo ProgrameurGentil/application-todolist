@@ -52,7 +52,6 @@ class MainActivity : ComponentActivity() {
 fun AppNavigation(viewModel: TaskViewModel) {
     val navController = rememberNavController()
 
-    // Définir le système de navigation
     NavHost(
         navController = navController,
         startDestination = "home",
@@ -93,7 +92,7 @@ fun AppNavigation(viewModel: TaskViewModel) {
 @Composable
 fun HomeScreenPreview() {
     NoteHaieTheme {
-        HomeScreenContent(ExempleTask.tasks, ExempleTask.tasks, {_, _ ->  }, {}, {})
+        HomeScreenContent(ExempleTask.tasks, ExempleTask.tasks, {_, _ ->  }, {}, {}, {})
     }
 }
 

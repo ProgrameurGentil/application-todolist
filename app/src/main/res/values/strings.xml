@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Note-Haie</string>
+    <string name="app_name" translatable="false">Note-Haie</string>
     <string name="en_cours">En cours</string>
     <string name="description_icon_fleche">fleche</string>
     <string name="page_ajout_tache">Ajouter une tache</string>
@@ -7,8 +7,7 @@
     <string name="valider">Valider</string>
     <string name="champ_vide">Champ vide</string>
     <string name="champ_vide_nom_tache">Vous avez oubliez de remplir le champ du titre de la tache</string>
-    <string name="nom_tache_defaut">Nom par défaut</string>
-    <string name="date_tache_defaut">Aucune date définit</string>
+    <string name="nom_tache_defaut">Ma tache</string>
     <string name="supprimer">Supprimer</string>
     <string name="modifier">Modifier</string>
     <string name="titre">Titre</string>
@@ -16,7 +15,7 @@
     <string name="description">Description</string>
     <string name="description_ici">Votre description ici…</string>
     <string name="periodicite">Periodicité</string>
-    <string name="ok">OK</string>
+    <string name="ok" translatable="false">OK</string>
     <string name="periodicite_unique">Une seul fois</string>
     <string name="periodicite_journalie">Tout les jours</string>
     <string name="periodicite_hebdomadaire">Une fois par semaine</string>
@@ -24,15 +23,15 @@
     <string name="description_icon_note_haie">Logo note haie</string>
     <string name="description_icon_parametre">Icon des parametres</string>
     <string name="description_bouton_ajout_tache">Bouton d\'ajout de tache</string>
-    <string name="mention_obligatoire_apres"> *</string>
+    <string name="mention_obligatoire_apres" translatable="false"> *</string>
     <string name="cliquer_pour_choisir">Cliquez pour chosir</string>
     <string name="nom_champ_date">Date :</string>
     <string name="nom_champ_heure">Heure :</string>
     <string name="selectionner">Selectionner</string>
     <string name="selectionner_heure">Selectionner une heure</string>
-    <string name="mention_obligatoire_avant">"* "</string>
+    <string name="mention_obligatoire_avant" translatable="false">"* "</string>
     <string name="mention_obligatoire">Champ de saisie obligatoire</string>
-    <string name="vide" />
+    <string name="vide" translatable="false" />
     <string name="page_modifier_tache">Modifier une tache</string>
     <string name="termine">Termine</string>
     <string name="notification_tache_retard_titre">Vous avez une tache en retard !</string>
@@ -44,4 +43,10 @@
     <string name="aucune_date_def">Aucune date définit</string>
     <string name="nom_channel_notif_retard_tache">Rappels de tâches</string>
     <string name="desc_channel_notif_retard_tache">Canal pour les rappels de vos tâches quotidiennes</string>
+    <string name="titre_suppression_tache">Suppression de tache</string>
+    <string name="message_confirmation_suppr_tache">Êtes-vous sûr de vouloir supprimer la tache \' %1$s \' ? \n\nCette action est définitive.</string>
+    <string name="champ_vide_date_tache">Vous avez oubliez de remplir le champ de la date de la tache</string>
+    <string name="champ_vide_time_tache">Vous avez oubliez de remplir le champ du temps (heure.s et minute.s) de la tache</string>
+    <string name="etat_periodicite">Peridodicité : %1$s</string>
+    <string name="etat_etat">État : %1$s</string>
 </resources>

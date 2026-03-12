@@ -91,7 +91,10 @@ fun UpdateTaskScreenContent(task: Task, navigateToBack: () -> Boolean, navigateT
 
     val errorEmptyField = stringResource(R.string.champ_vide)
     val errorEmptyFieldName = stringResource(R.string.champ_vide_nom_tache)
-    
+
+    val labelAccept = stringResource(R.string.modifier)
+    val labelCancel = stringResource(R.string.annuler)
+
     Column(
         modifier = Modifier
             .fillMaxSize(),
@@ -125,52 +128,37 @@ fun UpdateTaskScreenContent(task: Task, navigateToBack: () -> Boolean, navigateT
             setDateResponse = {
                 dateResponse = it
             },
-            buttonsContent = {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    ButtonView(
-                        text = stringResource(R.string.annuler),
-                        colors = ButtonColors(LightRed, Black, LightRed, LightRed),
-                        onClick = {
-                            if (!navigateToBack())
-                                navigateToHome()
-                        }
+            textButtonAccept = labelAccept,
+            onClickAccept = {
+                // TODO("faire dans les prochaines versions toutes les vérifications")
+
+                val title = titleResponse
+                val date = getUnixTimeWithDecomposedTime(dateResponse, hourResponse, minuteResponse)
+
+                if (title.isNullOrBlank()) {
+                    titleModalError = errorEmptyField
+                    textModalError = errorEmptyFieldName
+                    showModalError = true
+                } else {
+                    val newTask = Task(
+                        id = task.id,
+                        name = titleResponse ?: task.name,
+                        date = if (date == 0L) null else date, //TODO ne correspond qu'a un temps unique
+                        description = descriptionResponse ?: task.description,
+                        isValidated = task.isValidated,
+                        stateTime = task.stateTime,
+                        state = task.state,
+                        periodicy = periodicityResponse ?: task.periodicy,
+                        file = task.file
                     )
-
-                    ButtonView(
-                        text = stringResource(R.string.modifier),
-                        colors = ButtonColors(LightGreen, Black, LightGreen, LightGreen),
-                        onClick = {
-                            // TODO("faire dans les prochaines versions toutes les vérifications")
-
-                            val title = titleResponse
-                            val date = getUnixTimeWithDecomposedTime(dateResponse, hourResponse, minuteResponse)
-
-                            if (title.isNullOrBlank()) {
-                                titleModalError = errorEmptyField
-                                textModalError = errorEmptyFieldName
-                                showModalError = true
-                            } else {
-                                val newTask = Task(
-                                    id = task.id,
-                                    name = titleResponse ?: task.name,
-                                    date = if (date == 0L) null else date, //TODO ne correspond qu'a un temps unique
-                                    description = descriptionResponse ?: task.description,
-                                    isValidated = task.isValidated,
-                                    stateTime = task.stateTime,
-                                    state = task.state,
-                                    periodicy = periodicityResponse ?: task.periodicy,
-                                    file = task.file
-                                )
-                                updateTask(newTask)
-                                navigateToHome()
-                            }
-                        }
-                    )
+                    updateTask(newTask)
+                    navigateToHome()
                 }
+            },
+            textButtonCancel = labelCancel,
+            onClickCancel = {
+                if (!navigateToBack())
+                    navigateToHome()
             }
         )
         FooterView()

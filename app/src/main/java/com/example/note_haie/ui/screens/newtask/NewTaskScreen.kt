@@ -72,12 +72,9 @@ fun NewTaskScreenContent(addTask: (Task) -> Unit, navigateToBack: () -> Boolean,
     var minuteResponse by remember { mutableStateOf<Int?>(null) }
     var dateResponse  by remember { mutableStateOf<Long?>(null) }
 
-    var showModalError by remember { mutableStateOf(false) }
-    var titleModalError by remember { mutableStateOf("Erreur") }
-    var textModalError by remember { mutableStateOf("") }
-
-    val errorEmptyField = stringResource(R.string.champ_vide)
-    val errorEmptyFieldName = stringResource(R.string.champ_vide_nom_tache)
+    val labelAccept = stringResource(R.string.valider)
+    val labelCancel = stringResource(R.string.annuler)
+    val labelTaskNameDefault = stringResource(R.string.nom_tache_defaut)
 
     Column(
         modifier = Modifier
@@ -111,60 +108,35 @@ fun NewTaskScreenContent(addTask: (Task) -> Unit, navigateToBack: () -> Boolean,
             setDateResponse = {
                 dateResponse = it
             },
-            buttonsContent = {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    ButtonView(
-                        text = stringResource(R.string.annuler),
-                        colors = ButtonColors(LightRed, Black, LightRed, LightRed),
-                        onClick = {
-                            if (!navigateToBack())
-                                navigateToHome()
-                        }
-                    )
+            textButtonCancel = labelCancel,
+            onClickCancel = {
+                if (!navigateToBack())
+                    navigateToHome()
+            },
+            textButtonAccept = labelAccept,
+            onClickAccept = {
+                // TODO("faire dans les prochaines versions toutes les vérifications")
 
-                    ButtonView(
-                        text = stringResource(R.string.valider),
-                        colors = ButtonColors(LightGreen, Black, LightGreen, LightGreen),
-                        onClick = {
-                            // TODO("faire dans les prochaines versions toutes les vérifications")
+                val title = titleResponse
+                val date = getUnixTimeWithDecomposedTime(dateResponse, hourResponse, minuteResponse)
 
-                            val title = titleResponse
-                            val date = getUnixTimeWithDecomposedTime(dateResponse, hourResponse, minuteResponse)
+                val task = Task(
+                    id = 0,
+                    name = title ?: labelTaskNameDefault, // labelTaskNameDefault sert normalement jamais
+                    date = if (date == 0L) null else date, //TODO ne correspond qu'a un temps unique
+                    description = descriptionResponse ?: "",
+                    isValidated = mutableStateOf(false),
+                    stateTime = EnumStateTimeTask.NONE,
+                    state = EnumStateTask.NOT_REALISED,
+                    periodicy = periodicityResponse ?: EnumPeriodicyTask.SINGLE,
+                    file = null
+                )
+                addTask(task)
+                navigateToHome()
 
-                            if (title == null) {
-                                titleModalError = errorEmptyField
-                                textModalError = errorEmptyFieldName
-                                showModalError = true
-                            } else {
-                                val task = Task(
-                                    id = 0,
-                                    name = title,
-                                    date = if (date == 0L) null else date, //TODO ne correspond qu'a un temps unique
-                                    description = descriptionResponse ?: "",
-                                    isValidated = mutableStateOf(false),
-                                    stateTime = EnumStateTimeTask.NONE,
-                                    state = EnumStateTask.NOT_REALISED,
-                                    periodicy = EnumPeriodicyTask.SINGLE,
-                                    file = null
-                                )
-                                addTask(task)
-                                navigateToHome()
-                            }
-
-                        }
-                    )
-                }
             }
         )
         FooterView()
-
-        if (showModalError) {
-            ErrorModal(titleModalError, textModalError, {showModalError = false})
-        }
     }
 }
 

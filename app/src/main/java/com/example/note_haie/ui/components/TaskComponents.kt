@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Checkbox
@@ -61,6 +60,7 @@ import com.example.note_haie.ui.theme.Red
 import com.example.note_haie.ui.theme.White
 import com.example.note_haie.utils.decomposeUnixTime
 import com.example.note_haie.utils.getDateWithUnixTime
+import com.example.note_haie.utils.getUnixTimeWithDecomposedTime
 import com.example.note_haie.utils.unixToUtc
 
 @Composable
@@ -178,10 +178,16 @@ fun TaskButton(task: Task, onClick: () -> Unit, onValidatedTask: (Task, Boolean)
 }
 
 @Composable
-fun PanelTask(task: Task, onValidatedTask: (Task, Boolean) -> Unit, onDismiss: () -> Unit, onClickUpdate: () -> Unit) {
+fun PanelTask(task: Task, onValidatedTask: (Task, Boolean) -> Unit, onDismiss: () -> Unit, onClickUpdate: () -> Unit, onClickDelete: () -> Unit) {
     val context = LocalContext.current
 
+    val labelNoSpecificDate = stringResource(R.string.aucune_date_def)
+
     var checked by remember(task) { task.isValidated }
+    val date = when {
+        task.date != null -> unixToUtc(task.date, time = true)
+        else -> labelNoSpecificDate
+    }
 
     ModalBottomSheet(
         modifier = Modifier
@@ -232,13 +238,12 @@ fun PanelTask(task: Task, onValidatedTask: (Task, Boolean) -> Unit, onDismiss: (
                             .fillMaxHeight(),
                         horizontalAlignment = Alignment.Start
                     ) {
-                        val dateTime = decomposeUnixTime(task.date ?: 0)
                         Text(
                             text = task.name,
                             style = MaterialTheme.typography.headlineSmall
                         )
                         Text(
-                            text = if (task.periodicy != EnumPeriodicyTask.SINGLE) {"le ${dateTime.day} ${dateTime.month} ${dateTime.year} à ${dateTime.hour}h${dateTime.minute}"} else stringResource(R.string.date_tache_defaut),
+                            text = date,
                             style = MaterialTheme.typography.titleMedium
                         )
                         Text(
@@ -251,10 +256,16 @@ fun PanelTask(task: Task, onValidatedTask: (Task, Boolean) -> Unit, onDismiss: (
                 HorizontalDivider(thickness = 2.dp, modifier = Modifier.padding(vertical = 20.dp))
                 if (task.stateTime != EnumStateTimeTask.NONE) {
                     Text(
-                        text = "État : ${task.stateTime.label}",
+                        text = stringResource(R.string.etat_etat, task.stateTime.label),
                         style = MaterialTheme.typography.titleMedium
                     )
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
+
+                Text(
+                    text = stringResource(R.string.etat_periodicite, task.periodicy.label),
+                    style = MaterialTheme.typography.titleMedium
+                )
 
                 Spacer(modifier = Modifier.height(10.dp))
             }
@@ -263,7 +274,7 @@ fun PanelTask(task: Task, onValidatedTask: (Task, Boolean) -> Unit, onDismiss: (
                 horizontalArrangement = Arrangement.End
             ) {
                 Button(
-                    onClick = { },
+                    onClick = onClickDelete,
                     colors = ButtonColors(LightRed, Black, LightRed, LightRed)
                 ) {
                     Text(
@@ -296,7 +307,10 @@ fun FormTask(
     setDateResponse: (Long) -> Unit,
     setHourResponse: (Int) -> Unit,
     setMinuteResponse: (Int) -> Unit,
-    buttonsContent: @Composable () -> Unit,
+    textButtonAccept: String,
+    onClickAccept: () -> Unit,
+    textButtonCancel: String,
+    onClickCancel: () -> Unit,
     task: Task? = null
 ) {
 
@@ -312,6 +326,17 @@ fun FormTask(
     var timeIsRequired by remember { mutableStateOf(false) }
 
     var periodicyIsSingle by remember { mutableStateOf(true) }
+
+    var titleResponse by remember { mutableStateOf("") }
+
+    val errorEmptyField = stringResource(R.string.champ_vide)
+    val errorEmptyFieldName = stringResource(R.string.champ_vide_nom_tache)
+    val errorEmptyFieldDate = stringResource(R.string.champ_vide_date_tache)
+    val errorEmptyFieldTime = stringResource(R.string.champ_vide_time_tache)
+
+    var showModalError by remember { mutableStateOf(false) }
+    var titleModalError by remember { mutableStateOf(errorEmptyField) }
+    var textModalError by remember { mutableStateOf("") }
 
     val changePeriodicy = { newPeriodicy: EnumPeriodicyTask ->
         when(newPeriodicy) {
@@ -352,8 +377,6 @@ fun FormTask(
         }
     }
 
-
-
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.Start,
@@ -377,6 +400,7 @@ fun FormTask(
                 textColor = White,
                 valueResponse =  task?.name ?: "",
                 setResponse = {
+                    titleResponse = it
                     setTitleResponse(it)
                 }
             )
@@ -431,29 +455,44 @@ fun FormTask(
             LabelRequired()
         }
 
-        buttonsContent()
-    }
-}
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
+            ButtonView(
+                text = textButtonCancel,
+                colors = ButtonColors(LightRed, Black, LightRed, LightRed),
+                onClick = onClickCancel
+            )
 
-@Composable
-fun ErrorModal(title: String, text: String, onDismiss: () -> Unit) {
-    AlertDialog(
-        title = {
-            Text(text = title)
-        },
-        text = {
-            Text(text = text)
-        },
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(
-                onClick = {onDismiss()}
-            ) {
-                Text(stringResource(R.string.ok))
-            }
-        },
-        dismissButton = {}
-    )
+            ButtonView(
+                text = textButtonAccept,
+                colors = ButtonColors(LightGreen, Black, LightGreen, LightGreen),
+                onClick = {
+                    when {
+                        titleResponse.trim().isEmpty() -> {
+                            textModalError = errorEmptyFieldName
+                            showModalError = true
+                        }
+                        dateIsRequired && dateResponse == null -> {
+                            textModalError = errorEmptyFieldDate
+                            showModalError = true
+                        }
+                        timeIsRequired && (hourResponse == null || minuteResponse == null) -> {
+                            textModalError = errorEmptyFieldDate
+                            showModalError = true
+                        }
+                        else -> onClickAccept()
+                    }
+                }
+            )
+        }
+    }
+
+    if (showModalError) {
+        ErrorModal(titleModalError, textModalError, {showModalError = false})
+    }
 }
 
 /* Previews */
@@ -474,8 +513,10 @@ fun FormTaskPreview() {
             setDateResponse = {},
             setHourResponse = {},
             setMinuteResponse = {},
-            buttonsContent = {},
-
+            textButtonAccept = "Valider",
+            textButtonCancel = "Annuler",
+            onClickAccept = {},
+            onClickCancel = {}
         )
     }
 }
@@ -487,18 +528,6 @@ fun TaskViewPreview() {
         TaskView(
             ExempleTask.tasks[0],
             {_, _ ->}
-        )
-    }
-}
-
-@Preview(showBackground = false)
-@Composable
-fun ErrorModalPreview() {
-    NoteHaieTheme {
-        ErrorModal(
-            "Titre de l'erreur",
-            "Je suis une erreur !!",
-            onDismiss = {}
         )
     }
 }
