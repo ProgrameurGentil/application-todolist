@@ -68,30 +68,30 @@ data class Task(
  */
 fun copyTask(
     task: Task,
-    name: String? = null,
-    date: Long? = null,
-    dateValidated: Long? = null,
-    description: String? = null,
-    isValidated: MutableState<Boolean>? = null,
-    stateTime: EnumStateTimeTask? = null,
-    state: EnumStateTask? = null,
-    periodicy: EnumPeriodicyTask? = null,
-    priority: EnumPriorityLevel? = null,
-    file: String? = null): Task {
+    name: String = task.name,// Par défaut, on prend la valeur actuelle
+    date: Long? = task.date,
+    dateValidated: Long? = task.dateValidated,
+    description: String = task.description,
+    isValidated: MutableState<Boolean> = task.isValidated,
+    stateTime: EnumStateTimeTask = task.stateTime,
+    state: EnumStateTask = task.state,
+    periodicy: EnumPeriodicyTask = task.periodicy,
+    priority: EnumPriorityLevel = task.priority,
+    file: String? = task.file                 // Par défaut, on prend l'ancien fichier
+): Task {
     return Task(
         id = task.id,
-        name = name ?: task.name,
-        date = date ?: task.date,
-        dateValidated = dateValidated ?: task.dateValidated,
-        description = description ?: task.description,
-        isValidated = isValidated ?: task.isValidated,
-        stateTime = stateTime ?: task.stateTime,
-        state = state ?: task.state,
-        periodicy = periodicy ?: task.periodicy,
-        priority = priority ?: task.priority,
-        file = file ?: task.file
+        name = name,
+        date = date,
+        dateValidated = dateValidated,
+        description = description,
+        isValidated = isValidated,
+        stateTime = stateTime,
+        state = state,
+        periodicy = periodicy,
+        priority = priority,
+        file = file
     )
-
 }
 
 // pour les tests

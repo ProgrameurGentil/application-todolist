@@ -1,5 +1,6 @@
 package com.example.note_haie.ui.components
 
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -36,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -63,6 +65,8 @@ import com.example.note_haie.ui.theme.White
 import com.example.note_haie.utils.decomposeUnixTime
 import com.example.note_haie.utils.getDateWithUnixTime
 import com.example.note_haie.utils.unixToUtc
+import androidx.core.net.toUri
+import coil3.compose.AsyncImage
 
 @Composable
 fun TaskView(task: Task, onValidatedTask: (Task, Boolean) -> Unit) {
@@ -190,6 +194,8 @@ fun PanelTask(task: Task, onValidatedTask: (Task, Boolean) -> Unit, onDismiss: (
         else -> labelNoSpecificDate
     }
 
+    val image = if (task.file != null) (task.file).toUri() else null
+
     ModalBottomSheet(
         modifier = Modifier
             .fillMaxHeight(),
@@ -251,6 +257,19 @@ fun PanelTask(task: Task, onValidatedTask: (Task, Boolean) -> Unit, onDismiss: (
                             text = task.description,
                             style = MaterialTheme.typography.titleLarge,
                         )
+
+                        Spacer(modifier = Modifier.height(15.dp))
+
+                        if (image != null) {
+                            AsyncImage(
+                                model = image,
+                                contentDescription = stringResource(R.string.desc_imgage_selectionnee),
+                                modifier = Modifier
+                                    .size(200.dp)
+                                    .clip(RoundedCornerShape(8.dp)),
+                                contentScale = ContentScale.Crop
+                            )
+                        }
                     }
                 }
 
@@ -317,6 +336,7 @@ fun FormTask(
     setDateResponse: (Long) -> Unit,
     setHourResponse: (Int) -> Unit,
     setMinuteResponse: (Int) -> Unit,
+    setFileResponse: (String?) -> Unit,
     textButtonAccept: String,
     onClickAccept: () -> Unit,
     textButtonCancel: String,
@@ -391,7 +411,6 @@ fun FormTask(
     LazyColumn(
         modifier = modifier,
         horizontalAlignment = Alignment.Start,
-        verticalArrangement = Arrangement.SpaceBetween
     ) {
         item {
             Column(
@@ -474,6 +493,13 @@ fun FormTask(
                     Spacer(modifier = Modifier.height(10.dp))
                 }
 
+                ImagePicker(
+                    uri = if (task != null && task.file != null) (task.file).toUri() else null,
+                    onImageSelected = {
+                        setFileResponse(it)
+                    }
+                )
+
                 LabelRequired()
             }
 
@@ -538,6 +564,7 @@ fun FormTaskPreview() {
             setDateResponse = {},
             setHourResponse = {},
             setMinuteResponse = {},
+            setFileResponse = {},
             textButtonAccept = "Valider",
             textButtonCancel = "Annuler",
             onClickAccept = {},
